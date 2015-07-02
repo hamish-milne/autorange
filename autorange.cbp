@@ -33,9 +33,13 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="errors.cpp" />
-		<Unit filename="test.cpp" />
-		<Unit filename="version3.cpp" />
+		<Unit filename="src/fixed_ops.hpp" />
+		<Unit filename="src/fixed_ops_internal.hpp" />
+		<Unit filename="src/fixed_type.hpp" />
+		<Unit filename="src/helpers.hpp" />
+		<Unit filename="src/main.cpp" />
+		<Unit filename="src/mainpage.dox" />
+		<Unit filename="src/policy.hpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

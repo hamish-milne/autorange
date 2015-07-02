@@ -20,3 +20,24 @@
 	<stdexcept>
 	<iostream>
 
+1435867235 source:c:\users\hamish\documents\autorange\main.cpp
+	"fixed_ops.hpp"
+	<iostream>
+
+1435877615 c:\users\hamish\documents\autorange\helpers.hpp
+	<cstdint>
+	<cmath>
+
+1435867395 c:\users\hamish\documents\autorange\policy.hpp
+
+1435878131 c:\users\hamish\documents\autorange\fixed_ops.hpp
+	"fixed_ops_internal.hpp"
+
+1435871075 c:\users\hamish\documents\autorange\fixed_type.hpp
+	"helpers.hpp"
+	"policy.hpp"
+	<stdexcept>
+
+1435878118 c:\users\hamish\documents\autorange\fixed_ops_internal.hpp
+	"fixed_type.hpp"
+

@@ -27,6 +27,10 @@
 *.out
 *.app
 
+# Doxygen
+doxygen/html/*
+doxygen/doxygen.log
+
 # =========================
 # Operating System Files
 # =========================

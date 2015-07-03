@@ -42,13 +42,14 @@
 			<Add library="UnitTest++\Deliv\Release\libUnitTest++.a" />
 		</Linker>
 		<Unit filename="src/fixed_ops.hpp" />
-		<Unit filename="src/fixed_ops_internal.hpp" />
 		<Unit filename="src/fixed_type.hpp" />
 		<Unit filename="src/helpers.hpp" />
+		<Unit filename="src/internal/fixed_op_types.hpp" />
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/mainpage.dox" />
 		<Unit filename="src/policy.hpp" />
 		<Unit filename="src/test/Basic.cpp" />
+		<Unit filename="src/test/Helpers.cpp" />
 		<Extensions>
 			<code_completion>
 				<search_path add="UnitTest++" />

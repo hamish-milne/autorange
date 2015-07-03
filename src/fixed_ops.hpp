@@ -1,7 +1,7 @@
 #ifndef FIXED_OPS_HPP
 #define FIXED_OPS_HPP
 
-#include "fixed_ops_internal.hpp"
+#include "internal/fixed_op_types.hpp"
 
 using namespace autorange::internal;
 
@@ -52,31 +52,6 @@ namespace autorange
 		return a + (-b);
 	}
 	#undef SUB_RESULT
-
-	UNARY_OP_TEMPLATE
-	struct div_type
-	{
-	private:
-		typedef fixed<_min, _max, precision, policy, error> in_type;
-
-		static constexpr int base_precision = max(precision, P(min(
-			std::abs(1.0/in_type::real_min),
-			std::abs(1.0/in_type::real_max))));
-		static constexpr int base_error = policy::calc_div_error(_min, _max, 300, precision, base_precision);
-
-		static constexpr error_set e_set = policy::truncate_error(base_precision, base_error);
-
-	public:
-
-		typedef fixed<(int64_t)min(std::floor(1.0/in_type::real_min), std::floor(1.0/in_type::real_max)),
-		              (int64_t)max(std::ceil (1.0/in_type::real_min), std::ceil (1.0/in_type::real_max)),
-		              e_set.precision,
-		              policy,
-		              e_set.error
-		              > type;
-
-		static constexpr typename type::utype numerator = pow2((typename type::utype)type::precision + precision);
-	};
 
 	UNARY_OP_TEMPLATE
 	#define DIV_RESULT div_type<policy, _min, _max, precision, error>

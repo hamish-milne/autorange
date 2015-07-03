@@ -31,6 +31,10 @@
 doxygen/html/*
 doxygen/doxygen.log
 
+# CodeBlocks
+*.depend
+*.layout
+
 # =========================
 # Operating System Files
 # =========================

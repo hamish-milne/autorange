@@ -28,11 +28,19 @@
 				<Linker>
 					<Add option="-s" />
 				</Linker>
+				<ExtraCommands>
+					<Add after="$exe_output" />
+					<Mode after="always" />
+				</ExtraCommands>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add directory="UnitTest++" />
 		</Compiler>
+		<Linker>
+			<Add library="UnitTest++\Deliv\Release\libUnitTest++.a" />
+		</Linker>
 		<Unit filename="src/fixed_ops.hpp" />
 		<Unit filename="src/fixed_ops_internal.hpp" />
 		<Unit filename="src/fixed_type.hpp" />
@@ -40,8 +48,11 @@
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/mainpage.dox" />
 		<Unit filename="src/policy.hpp" />
+		<Unit filename="src/test/Basic.cpp" />
 		<Extensions>
-			<code_completion />
+			<code_completion>
+				<search_path add="UnitTest++" />
+			</code_completion>
 			<envvars />
 			<debugger />
 			<lib_finder disable_auto="1" />

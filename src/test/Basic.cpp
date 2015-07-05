@@ -22,7 +22,7 @@ namespace
 		{
 			auto n = numbers[i];
 			if(n >= min && n <= max)
-				CHECK_EQUAL(n, (int)((int_type<min, max>(n)).to_double()));
+				CHECK_EQUAL(n, (int)((int_t<min, max>(n)).to_double()));
 		}
 	}
 

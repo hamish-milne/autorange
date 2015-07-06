@@ -44,8 +44,6 @@ namespace autorange
 		static constexpr int size = integral + precision;
 		static constexpr int64_t integral_min = is_signed ? -pow2(integral) : 0;
 		static constexpr int64_t integral_max = pow2(is_signed ? integral : integral+1);
-		//static constexpr double real_min = (double)integral_min;
-		//static constexpr double real_max = (double)integral_max + 1 - step;
 		static constexpr double real_error = step * ((double)error/policy::full_error);
 
 		typedef int64_t utype;
@@ -62,8 +60,8 @@ namespace autorange
 
 		static constexpr utype calc_n(double d)
 		{
-			return (d > _max || d < _min) ? (
-				throw std::logic_error("Argument out of range")
+			return (d > max || d < min) ? (
+				throw std::logic_error("autorange::fixed: Argument out of range")
 			) : (
 				is_signed ? (
 					sign_extend(std::round(d * pshift))

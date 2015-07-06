@@ -15,8 +15,8 @@ namespace autorange
 			  fixed<minB, maxB, precisionB, policy, errorB> b)
 	{
 		return ADD_RESULT::type::create(
-				 shift((typename ADD_RESULT::type::utype)a.n, ADD_RESULT::shiftA)
-			   + shift((typename ADD_RESULT::type::utype)b.n, ADD_RESULT::shiftB));
+				 shift(a.n, ADD_RESULT::shiftA)
+			   + shift(b.n, ADD_RESULT::shiftB));
 	}
 	#undef ADD_RESULT
 
@@ -27,9 +27,7 @@ namespace autorange
 	operator*(fixed<minA, maxA, precisionA, policy, errorA> a,
 			  fixed<minB, maxB, precisionB, policy, errorB> b)
 	{
-		return MUL_RESULT::type::create(shift(
-				 (typename MUL_RESULT::type::utype)a.n
-			   * (typename MUL_RESULT::type::utype)b.n, MUL_RESULT::shift));
+		return MUL_RESULT::type::create(shift(a.n * b.n, MUL_RESULT::shift));
 	}
 	#undef MUL_RESULT
 
@@ -38,7 +36,7 @@ namespace autorange
 	NEG_RESULT
 	operator-(fixed<_min, _max, precision, policy, error> a)
 	{
-		return NEG_RESULT::create(-(typename NEG_RESULT::utype)a.n);
+		return NEG_RESULT::create(-a.n);
 	}
 	#undef NEG_RESULT
 
@@ -49,7 +47,7 @@ namespace autorange
 	operator-(fixed<minA, maxA, precisionA, policy, errorA> a,
 	          fixed<minB, maxB, precisionB, policy, errorB> b)
 	{
-		return a + (-b);
+		return SUB_RESULT::create(a.n - b.n);
 	}
 	#undef SUB_RESULT
 
@@ -60,18 +58,16 @@ namespace autorange
 	operator/(fixed<minA, maxA, precisionA, policy, errorA> a,
 	          fixed<minB, maxB, precisionB, policy, errorB> b)
 	{
-		return DIV_TYPE::type::create(
-			shift(typename DIV_TYPE::type::utype(a.n), DIV_TYPE::shiftA) /
-			typename DIV_TYPE::type::utype(b.n));
+		return DIV_TYPE::type::create(shift(a.n, DIV_TYPE::shiftA) / b.n);
 	}
 	#undef DIV_TYPE
 
-	template<int root, int64_t _min, int64_t _max, int precision, class policy, int error>
-	#define ROOT_TYPE root_type<root, _min, _max, precision, policy, error>
+	template<int _root, int64_t _min, int64_t _max, int precision, class policy, int error>
+	#define ROOT_TYPE root_type<_root, _min, _max, precision, policy, error>
 	constexpr typename ROOT_TYPE::type
 	root(fixed<_min, _max, precision, policy, error> a)
 	{
-		return policy::nrt<root>(a.n) * /* m_root */
+		return ROOT_TYPE::type::create(policy::root<_root>(a.n) /* *ROOT_TYPE::m_root */);
 	}
 
 }

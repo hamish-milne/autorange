@@ -129,7 +129,7 @@ namespace autorange
 			static constexpr int base_precision = ceil((double)precision/root);
 			static constexpr int exp_diff = precision - (root*base_precision);
 		public:
-			static constexpr double m_root = exp_diff == 0 ? 0 : std::pow(2, (double)exp_diff/root);
+			static constexpr double m_root = exp_diff == 0 ? 1 : std::pow(2, (double)exp_diff/root);
 		private:
 			static constexpr int64_t min_n = (_min <= 0) ? 0 : _min;
 			static constexpr int64_t fn = min_n * policy::full_error;

@@ -41,6 +41,7 @@
 		<Linker>
 			<Add library="UnitTest++\Deliv\Release\libUnitTest++.a" />
 		</Linker>
+		<Unit filename="src/fixed_const.hpp" />
 		<Unit filename="src/fixed_ops.hpp" />
 		<Unit filename="src/fixed_type.hpp" />
 		<Unit filename="src/helpers.hpp" />

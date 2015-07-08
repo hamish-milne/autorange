@@ -63,11 +63,6 @@ namespace autorange
 		return min(min(a, b), min(c, d));
 	}
 
-	/** \brief The difference by which the helper functions consider two numbers
-	 *         to be equal.
-	 */
-	constexpr double epsilon = 0.00000000001;
-
 	/** \brief Rounds a number up
 	 *
 	 * \param v  The value to round
@@ -75,7 +70,7 @@ namespace autorange
 	 */
 	constexpr int64_t ceil(double v)
 	{
-		return (v - int64_t(v)) > epsilon ? int64_t(v)+1 : int64_t(v);
+		return (v - int64_t(v)) > 0 ? int64_t(v)+1 : int64_t(v);
 	}
 
 	/** \brief Calculates the base 2 logarithm of the input
@@ -85,8 +80,7 @@ namespace autorange
 	 */
 	constexpr int64_t log2(double v)
 	{
-		// This is an underestimate, because we're using ceil anyway:
-		#define M_LOG2 1.44269504089
+		#define M_LOG2 1.442695040888963407359924681
 		return ceil(std::log(v)*M_LOG2);
 		#undef M_LOG2
 	}

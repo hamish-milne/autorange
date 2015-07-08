@@ -1,0 +1,175 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\numberwithin{equation}{section}
+\numberwithin{equation}{subsection}
+\author{Hamish Milne}
+\title{AutoRange: A Methodology for the Typical Unification of Access Points and Redundancy}
+\begin{document}
+	
+	\maketitle
+	
+	\section{Introduction}
+	
+	Blibbidy blobbidy bloop.
+	
+	To calculate the result of each operation, we can look at each operand in terms of its component parts: the underlying integer, an error term, and a shift.
+	\begin{equation}
+	r_i = (n_i \pm \frac{e_i}{f})\cdot 2^{-p_i}
+	\end{equation}
+	Where $r$ is the real number, $n$ is the integer, $e$ is the error number, $f$ is the full error constant and $p$ is the precision. This equation isn't complete; we're missing a random coefficient for the error, but since we'll be dealing with the worst case error in general, we can omit it.
+	
+	We additionally use the real $max$ and $min$ for every value, both in error calculations and in allocating bits for the integer portion of the number.
+	
+	With this technique, we can calculate formulae for the precision, error and integer of the output of many mathematical operations. There are a few things to keep in mind:
+	\begin{itemize}
+		\item We must only use the component values; i.e. not the real ones (at least at runtime)
+		\item The formulae for $n_i$ should use as few operations as possible, because they will be calculated at runtime.
+		\item Shifts ($2^x$) are free at runtime.
+		\item The integral and error components can be separated out, if they are additive.
+		\item The error term cannot contain $n_i$ (because we want to calculate it at compile time).
+	\end{itemize}
+	
+	\section{Basic arithmetic}
+	
+	\subsection{Addition}
+	
+	Let's start with the basics.
+	
+	\begin{eqnarray}
+	r_c = r_a + r_b \\
+	(n_c \pm \frac{e_c}{f})\cdot 2^{-p_c} = (n_a \pm \frac{e_a}{f})\cdot 2^{-p_a} + (n_b \pm \frac{e_b}{f})\cdot 2^{-p_b}
+	\end{eqnarray}
+	
+	Firstly, we need to come up with a value for $p_c$, since it doesn't seem apparent from the equation, and there's not much we can do without one. 
+	
+	\begin{equation}
+	p_c = max(p_a, p_b)
+	\end{equation}
+	
+	Let's choose this to preserve all the information.
+	
+	\begin{equation}
+	n_c \pm \frac{e_c}{f} = (n_a \pm \frac{e_a}{f})\cdot 2^{p_c-p_a} + (n_b \pm \frac{e_b}{f})\cdot 2^{p_c-p_b}
+	\end{equation}
+	
+	We can now get rid of the individual shifts...
+	
+	\begin{eqnarray}
+	n_c = n_a\cdot 2^{p_c-p_a} + n_b\cdot 2^{p_c-p_b} \\
+	e_c = e_a\cdot 2^{p_c-p_a} + e_b\cdot 2^{p_c-p_b}
+	\end{eqnarray}
+	
+	...and split the result into the integer and error components.
+	
+	\begin{eqnarray}
+	min_c = min_a + min_b \\
+	max_c = max_a + max_b
+	\end{eqnarray}
+	
+	The limits can be easily discerned from intuition.
+	
+	\subsection{Negation}
+	
+	\begin{eqnarray}
+	r_c = -r_a \\
+	(n_c \pm \frac{e_c}{f})\cdot 2^{-p_c} = -(n_a \pm \frac{e_a}{f})\cdot 2^{-p_a}
+	\end{eqnarray}
+	
+	It's fairly obvious that we should choose $p_c = p_a$ in this case. As a result:
+	
+	\begin{eqnarray}
+		n_c = -n_a \\
+		e_c = e_a \\
+		min_c = -max_a \\
+		max_c = -min_a
+	\end{eqnarray}
+	
+	\subsection{Subtraction}
+	
+	\begin{eqnarray}
+		r_c = r_a - r_b \\
+		p_c = max(p_a, p_b) \\
+		n_c = n_a\cdot 2^{p_c-p_a} - n_b\cdot 2^{p_c-p_b} \\
+		e_c = e_a\cdot 2^{p_c-p_a} + e_b\cdot 2^{p_c-p_b} \\
+		min_c = min_a - max_b \\
+		max_c = max_a - min_b
+	\end{eqnarray}
+	
+	Subtraction is now straightforward, as it's simply a combination of addition and negation.
+	
+	\section{Coefficients}
+	
+	\subsection{Multiplication}
+	
+	Multiplication is a little trickier, because we lose the linearity with additive error terms.
+	
+	\begin{eqnarray}
+		r_c = r_a \times r_b \\
+		r_c = (n_a \pm \frac{e_a}{f})\cdot 2^{-p_a} \times (n_b \pm \frac{e_b}{f})\cdot 2^{-p_b} \\
+		(n_c \pm \frac{e_c}{f})\cdot 2^{-p_c} = ({n_a}{n_b} \pm {n_a}\frac{e_b}{f} \pm {n_b}\frac{e_e}{f} \pm \frac{{e_a}{e_b}}{f^2})\cdot 2^{-p_a-p_b}
+	\end{eqnarray}
+	
+	In this case, the new precision is quite apparent from the form of the equation: $p_c = p_a + p_b$. However, we can see that the error terms contain both $n_a$ and $n_b$, which cannot happen. There's a few different solutions, but for the worst case it's simplest to take the absolute maximum of both operands.
+	
+	\begin{eqnarray}
+		n_c = {n_a}{n_b} \\
+		e_c = max(abs(min_a), max_a) \cdot e_b + max(abs(min_b), max_b) \cdot e_a + \frac{{e_a}{e_b}}{f}
+	\end{eqnarray}
+	
+	We need to take the absolute value of the minimum, but we can omit it for the maximum, because if the latter is below 0 then the former will be 'more negative' and thus take precedence.
+	
+	\begin{eqnarray}
+		max_c = max(min_a min_b, min_a max_b, max_a min_b, max_a max_b) \\
+		min_c = min(min_a min_b, min_a max_b, max_a min_b, max_a max_b)
+	\end{eqnarray}
+	
+	Since the minimum and maximum values could be negative, it's easier to simply compare all the possible extremes than to manually check all 16 sign combinations.
+	
+	\subsection{Inversion}
+	
+	At a first glance, inversion seems quite reasonable...
+	
+	\begin{eqnarray}
+		r_c = \frac{1}{r_a} \\
+		n_c \pm \frac{e_c}{f} = \frac{2^{p_a+p_c}}{n_a \pm \frac{e_a}{f}} 
+	\end{eqnarray}
+	
+	However, we now come to a point where there is no value of $p_c$ that won't result in an entirely accurate output. As an example, $1$ and $3$ are both integers, but $1/3 = 1.\dot{3}$, which cannot be expressed in binary.
+	
+	As a result, we have to choose a suitable approximate value. I decided on the following:
+	
+	\begin{equation}
+		p_c = max(log_2[max(abs[min_a], max_a)], p_a)
+	\end{equation}
+	
+	This takes into account the possible small value results when $n_a$ is large, but won't increase precision beyond that.
+	
+	\begin{equation}
+		e_c = f\cdot 2^{p_a+p_c}\cdot \left(\frac{1}{bound(n_a) - \frac{e_a}{f}} - \frac{1}{bound(n_a)}\right)
+	\end{equation}
+	
+	Secondly, we need to consider the error. This becomes difficult when $n_a$ can be zero, as the error becomes very large, increasing with precision. There's no absolute solution, but one thing we can do is use an approximate lower bound; I chose a default value of $\frac{2^{p_a}}{5}$. Of course if the min-max values don't cover zero, we can just use the smallest of these as our bound.
+	
+	\begin{eqnarray}
+		bound(n_a) = max\left(min(abs(max_a),abs(min_a)), \frac{2^{p_a}}{5}\right) \\
+		min_c = \begin{cases}
+			1/max_a & \text{if } min_a > 0 \text{ or } max_a < 0 \\
+			-2^{p_a} & \text{otherwise}
+		\end{cases} \\
+		max_c = \begin{cases}
+			1/min_a & \text{if } min_a > 0 \text{ or } max_a < 0 \\
+			2^{p_a} & \text{otherwise}
+		\end{cases}
+	\end{eqnarray}
+	
+	\subsection{Division}
+	
+	As with subtraction, division can be considered a combination of the previous two operations.
+	
+	
+	
+\end{document}

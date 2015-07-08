@@ -58,7 +58,7 @@ namespace autorange
 	operator/(fixed<minA, maxA, precisionA, policy, errorA> a,
 	          fixed<minB, maxB, precisionB, policy, errorB> b)
 	{
-		return DIV_TYPE::type::create(shift(a.n, DIV_TYPE::shiftA) / b.n);
+		return DIV_TYPE::type::create(shift(shift(a.n, DIV_TYPE::shiftA) / b.n, DIV_TYPE::shiftC));
 	}
 	#undef DIV_TYPE
 

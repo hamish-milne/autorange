@@ -31,7 +31,7 @@ namespace
 		CHECK_EQUAL(0, log2(1));
 		CHECK_EQUAL(1, log2(1.01));
 		CHECK_EQUAL(8, log2(256));
-		CHECK_EQUAL(-8, log2((double)1.0/(double)256.0));
+		CHECK_EQUAL(-8, log2(1.0/256.0));
 		CHECK_EQUAL(0, log2(0.51));
 	}
 }

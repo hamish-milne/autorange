@@ -69,28 +69,26 @@ namespace autorange
 		UNARY_OP_TEMPLATE
 		struct inv_type
 		{
-		private:
+		//private:
 			typedef fixed<_min, _max, precision, policy, error> in_type;
 
-			static constexpr double inv(double v, bool default_high)
-			{
-				return (v == 0) ? (default_high ? 987654321 : -987654321) : (1.0/v);
-			}
-
-			static constexpr int base_precision = max(precision, P(min(
-				inv(std::abs(in_type::min), true),
-				inv(std::abs(in_type::max), true))));
-			static constexpr int base_error = policy::calc_div_error(_min, _max, 300, precision, base_precision);
+			static constexpr int base_precision = max(precision, (int)log2(max((int64_t)std::abs(_min), _max)));
+			static constexpr int base_error = policy::calc_div_error(_min, _max, error, precision, base_precision);
 
 			static constexpr error_set e_set = policy::truncate_error(base_precision, base_error);
 
+			static constexpr int64_t new_min = (int64_t)std::ceil(1.0/(
+				(_min > 0 || _max < 0) ?_max : -std::pow(2.0, -precision)));
+			static constexpr int64_t new_max = (int64_t)std::ceil(1.0/(
+				(_min > 0 || _max < 0) ? _min : std::pow(2.0, -precision)));
+
 		public:
 
-			typedef fixed<(int64_t)min(std::floor(inv(in_type::min, true)), std::floor(inv(in_type::max, true))),
-						  (int64_t)max(std::ceil(inv(in_type::min, false)), std::ceil(inv(in_type::max, false))),
-						  e_set.precision,
+			typedef fixed<new_min,
+						  new_max,
+						  base_precision, //e_set.precision,
 						  policy,
-						  e_set.error
+						  base_error //e_set.error
 						  > type;
 
 			static constexpr int shiftN = type::precision + precision;
@@ -103,15 +101,16 @@ namespace autorange
 			typedef fixed<minA, maxA, precisionA, policy, errorA> num_type;
 			typedef inv_type<policy, minB, maxB, precisionB, errorB> inv_t;
 			typedef typename inv_t::type den_type;
+			typedef mul_type<policy,
+				num_type::min, num_type::max, num_type::precision, num_type::error,
+				den_type::min, den_type::max, den_type::precision, den_type::error
+				> mul_result;
 
 		public:
 
 			static constexpr int shiftA = inv_t::shiftN;
-
-			typedef typename mul_type<policy,
-				num_type::min, num_type::max, num_type::precision, num_type::error,
-				den_type::min, den_type::max, den_type::precision, den_type::error
-				>::type type;
+			static constexpr int shiftC = mul_result::shift;
+			typedef typename mul_result::type type;
 		};
 
 		template<int root, int64_t _min, int64_t _max, int precision, class policy, int error>

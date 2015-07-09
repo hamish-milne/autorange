@@ -86,9 +86,9 @@ namespace autorange
 
 			typedef fixed<new_min,
 						  new_max,
-						  base_precision, //e_set.precision,
+						  e_set.precision,
 						  policy,
-						  base_error //e_set.error
+						  e_set.error
 						  > type;
 
 			static constexpr int shiftN = type::precision + precision;

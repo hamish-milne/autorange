@@ -31,16 +31,16 @@ namespace autorange
 
 		static constexpr double low_bound = 0.2;
 
-		static constexpr double bound(int64_t _min, int64_t _max, int precision)
+		static constexpr double bound(int64_t _min, int64_t _max)
 		{
-			return max(min(std::abs(_max), std::abs(_min)), std::pow(2.0, precision)/5);
+			return max(min(std::abs(_max), std::abs(_min)), 1.0);
 		}
 
 		static constexpr int64_t calc_div_error(int64_t min, int64_t max, int error, int in_precision, int out_precision)
 		{
 			return std::ceil(full_error * std::pow(2.0, out_precision) * (
-				(std::pow(2.0, in_precision)/(bound(min, max, in_precision) - ((double)error/full_error))) -
-				(std::pow(2.0, in_precision)/(bound(min, max, in_precision)))
+				1/(bound(min, max) - (error/(full_error*std::pow(2.0, in_precision)))) -
+				1/(bound(min, max))
 			));
 		}
 	};

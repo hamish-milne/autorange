@@ -14,7 +14,7 @@ typedef inv_type<fixed_policy, 0, 255, 8, 512> t_inv;
 
 int main()
 {
-	fixed<0, 255, 8> a(0.125);
+	fixed<0, 255, 16> a(0.1);
 	int_t<0, 2> b(1);
 
 	auto c = b/a;

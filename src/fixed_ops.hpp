@@ -3,9 +3,9 @@
 
 #include "internal/fixed_op_types.hpp"
 
-using namespace autorange::internal;
+using namespace arpea::internal;
 
-namespace autorange
+namespace arpea
 {
 	BINARY_OP_TEMPLATE
 	#define ADD_RESULT add_type<policy, minA, maxA, precisionA, errorA, \

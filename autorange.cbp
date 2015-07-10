@@ -35,12 +35,14 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-std=c++11" />
 			<Add option="-Wall" />
 			<Add directory="UnitTest++" />
 		</Compiler>
 		<Linker>
 			<Add library="UnitTest++\Deliv\Release\libUnitTest++.a" />
 		</Linker>
+		<Unit filename="src/arpea_core.hpp" />
 		<Unit filename="src/fixed_const.hpp" />
 		<Unit filename="src/fixed_ops.hpp" />
 		<Unit filename="src/fixed_type.hpp" />

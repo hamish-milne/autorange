@@ -3,7 +3,7 @@
 #include <climits>
 #include "../helpers.hpp"
 
-using namespace autorange;
+using namespace arpea;
 
 namespace
 {
@@ -25,7 +25,7 @@ namespace
 		CHECK_EQUAL(INT_MIN, min(1, -1, INT_MIN, 0));
 	}
 
-	using autorange::log2;
+	using arpea::log2;
 	TEST(Log2)
 	{
 		CHECK_EQUAL(0, log2(1));

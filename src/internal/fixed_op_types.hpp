@@ -10,7 +10,7 @@
 #define UNARY_OP_TEMPLATE template<class policy, \
 	int64_t _min, int64_t _max, int precision, int error>
 
-namespace autorange
+namespace arpea
 {
 	namespace internal
 	{

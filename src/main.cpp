@@ -2,13 +2,13 @@
 
 #include "fixed_ops.hpp"
 #include "fixed_const.hpp"
-using namespace autorange;
+using namespace arpea;
 
 #include <iostream>
 using std::cout;
 using std::endl;
 
-using namespace autorange::internal;
+using namespace arpea::internal;
 
 typedef inv_type<fixed_policy, 0, 255, 8, 512> t_inv;
 
@@ -24,8 +24,8 @@ int main()
 	cout << std::ceil((0 > 0 || 255 < 0) ? (double)(1.0/255.0) : -(double)std::pow(2.0, 8)) << endl;
 
 	cout.precision(30);
-	fixed_const<D(-127.123456789)> d;
-	cout << d.value << endl << (long double)1.0/std::log((long double)2.0) << endl;
+	fixed_const<D(1.12345678901234567890)> d;
+	cout << d.value << endl;
 
 	UnitTest::RunAllTests();
 }

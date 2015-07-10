@@ -6,21 +6,21 @@
 
 #include <stdexcept>
 
-namespace autorange
+namespace arpea
 {
 	template<
-		int64_t _min,
-		int64_t _max,
-		int _precision = 0,
+		int64_t Min,
+		int64_t Max,
+		int Precision = 0,
 		class policy = fixed_policy,
-		int _error = policy::default_error
+		int Error = policy::default_error
 		>
 	struct fixed
 	{
-		static constexpr int64_t min = _min;
-		static constexpr int64_t max = _max;
-		static constexpr int precision = _precision;
-		static constexpr int error = _error;
+		static constexpr int64_t min = Min;
+		static constexpr int64_t max = Max;
+		static constexpr int precision = Precision;
+		static constexpr int error = Error;
 		static constexpr bool is_signed = min < 0;
 
 	private:
@@ -40,7 +40,7 @@ namespace autorange
 
 	public:
 
-		static constexpr int integral = autorange::max(calc_negative_size(), calc_positive_size());
+		static constexpr int integral = arpea::max(calc_negative_size(), calc_positive_size());
 		static constexpr int size = integral + precision;
 		static constexpr int64_t integral_min = is_signed ? -pow2(integral) : 0;
 		static constexpr int64_t integral_max = pow2(is_signed ? integral : integral+1);
@@ -61,7 +61,7 @@ namespace autorange
 		static constexpr utype calc_n(double d)
 		{
 			return (d > max || d < min) ? (
-				throw std::logic_error("autorange::fixed: Argument out of range")
+				throw std::logic_error("fixed: Argument out of range")
 			) : (
 				is_signed ? (
 					sign_extend(std::round(d * pshift))
@@ -71,7 +71,7 @@ namespace autorange
 			);
 		}
 
-		constexpr fixed(utype _n, bool raw) : n(_n)
+		explicit constexpr fixed(utype _n, bool raw) : n(_n)
 		{
 			static_assert(max > min, "Max must be greater than min");
 			static_assert(error >= 0, "Error must be positive");
@@ -101,8 +101,8 @@ namespace autorange
 
 	};
 
-	template<int64_t min, int64_t max>
-	using int_t = fixed<min, max, 0, fixed_policy, 0>;
+	template<int64_t Min, int64_t Max>
+	using integer = fixed<Min, Max, 0, fixed_policy, 0>;
 }
 
 #endif

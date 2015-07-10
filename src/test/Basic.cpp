@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <climits>
 
-using namespace autorange;
+using namespace arpea;
 using std::vector;
 
 namespace
@@ -22,7 +22,7 @@ namespace
 		{
 			auto n = numbers[i];
 			if(n >= min && n <= max)
-				CHECK_EQUAL(n, (int)((int_t<min, max>(n)).to_double()));
+				CHECK_EQUAL(n, (int)((integer<min, max>(n)).to_double()));
 		}
 	}
 

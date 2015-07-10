@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <cmath>
 
-namespace autorange
+namespace arpea
 {
 	/**
 	 * \addtogroup Helpers

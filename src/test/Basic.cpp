@@ -13,16 +13,15 @@ namespace
 {
 
 
-	template<int64_t min, int64_t max>
+	template<int_t min, int_t max>
 	void int_test()
 	{
-		static const vector<int64_t> numbers = {0, 1, -1, -100, 100};
+		static const vector<int_t> numbers = {0, 1, -1, -100, 100};
 
-		for(size_t i = 0; i < numbers.size(); i++)
+		for(auto n : numbers)
 		{
-			auto n = numbers[i];
 			if(n >= min && n <= max)
-				CHECK_EQUAL(n, (int)((integer<min, max>(n)).to_double()));
+				CHECK_EQUAL(n, (int)(real_t(integer<min, max>(n))));
 		}
 	}
 

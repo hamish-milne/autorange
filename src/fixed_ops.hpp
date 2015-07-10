@@ -8,17 +8,17 @@ using namespace arpea::internal;
 namespace arpea
 {
 	BINARY_OP_TEMPLATE
-	#define ADD_RESULT add_type<policy, minA, maxA, precisionA, errorA, \
-										minB, maxB, precisionB, errorB>
-	constexpr typename ADD_RESULT::type
+	constexpr auto
 	operator+(fixed<minA, maxA, precisionA, policy, errorA> a,
 			  fixed<minB, maxB, precisionB, policy, errorB> b)
+		-> typename add_type<decltype(a), decltype(b)>::add_t
 	{
-		return ADD_RESULT::type::create(
-				 shift(a.n, ADD_RESULT::shiftA)
-			   + shift(b.n, ADD_RESULT::shiftB));
+		typedef add_type<decltype(a), decltype(b)> add_result;
+		typedef typename add_result::add_t::utype utype;
+		return add_result::add_t::create(
+				 shift(utype(a.n), add_result::shiftA)
+			   + shift(utype(b.n), add_result::shiftB));
 	}
-	#undef ADD_RESULT
 
 	BINARY_OP_TEMPLATE
 	#define MUL_RESULT mul_type<policy, minA, maxA, precisionA, errorA, \
@@ -41,15 +41,16 @@ namespace arpea
 	#undef NEG_RESULT
 
 	BINARY_OP_TEMPLATE
-	#define SUB_RESULT add_type<policy, minA, maxA, precisionA, errorA, \
-	                                   -maxB,-minB, precisionB, errorB>
-	typename SUB_RESULT::type
+	constexpr auto
 	operator-(fixed<minA, maxA, precisionA, policy, errorA> a,
 	          fixed<minB, maxB, precisionB, policy, errorB> b)
+		-> typename add_type<decltype(a), decltype(b)>::sub_t
 	{
-		return SUB_RESULT::create(a.n - b.n);
+		using sub_result = typename add_type<decltype(a), decltype(b)>::sub_t;
+		return sub_result::create(
+				 shift(a.n, sub_result::shiftA)
+			   - shift(b.n, sub_result::shiftB));
 	}
-	#undef SUB_RESULT
 
 	BINARY_OP_TEMPLATE
 	#define DIV_TYPE div_type<policy, minA, maxA, precisionA, errorA, \
@@ -62,7 +63,7 @@ namespace arpea
 	}
 	#undef DIV_TYPE
 
-	template<int _root, int64_t _min, int64_t _max, int precision, class policy, int error>
+	template<int _root, int_t _min, int_t _max, int precision, class policy, int error>
 	#define ROOT_TYPE root_type<_root, _min, _max, precision, policy, error>
 	constexpr typename ROOT_TYPE::type
 	root(fixed<_min, _max, precision, policy, error> a)

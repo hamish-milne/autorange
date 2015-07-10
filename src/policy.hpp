@@ -3,6 +3,10 @@
 
 namespace arpea
 {
+	/** \brief Stores precision and error values together.
+	 *
+	 * This is used to make the error truncation function neater
+	 */
 	struct error_set
 	{
 		int precision;
@@ -14,6 +18,9 @@ namespace arpea
 		}
 	};
 
+	/** \brief The default policy class for the `fixed` type
+	 *
+	 */
 	struct fixed_policy
 	{
 		/** \brief A full LSB's worth of error.
@@ -54,27 +61,41 @@ namespace arpea
 		static constexpr error_set truncate_error(int precision, int error)
 		{
 			static_assert(max_error > full_error, "max_error must be greater than full_error");
-			return error > max_error ? truncate_error(precision - 1, ceil((double)error/2)
+			return error > max_error ? truncate_error(precision - 1, ceil((real_t)error/2)
 				+ full_error/2) : error_set(precision, error);
 		}
 
-		/** \brief The lower bound estimate used for division error calculation
+		/** \brief The lower bound estimate used for division error calculation.
 		 *
-		 * This is chosen heuristically, and isn't accessed outside the class.
+		 * This is chosen heuristically, and isn't part of the policy specification.
 		 */
-		static constexpr double low_bound = 1.0;
+		static constexpr real_t low_bound = 1.0;
 
-		/** \brief Calculates a lower bound from the given interval
+		/** \brief Calculates a lower bound from the given interval.
 		 *
+		 * \param Min  The start of the range interval
+		 * \param Max  The end of the range interval
+		 *
+		 * This function isn't part of the policy specification.
 		 */
-		static constexpr double bound(int64_t _min, int64_t _max)
+		static constexpr real_t bound(int_t Min, int_t Max)
 		{
-			return max(min(std::abs(_max), std::abs(_min)), low_bound);
+			return max((real_t)min(std::abs(Max), std::abs(Min)), low_bound);
 		}
 
-		static constexpr int64_t calc_div_error(int64_t min, int64_t max, int error, int in_precision, int out_precision)
+		/** \brief Calculates the new error in an inversion operation
+		 *
+		 * \param min            The start of the value range
+		 * \param max            The end of the value range
+		 * \param error          The initial error
+		 * \param in_precision   The precision of the input
+		 * \param out_precision  The output precision, as calculated
+		 *
+		 * This won't truncate the error - that must be done separately.
+		 */
+		static constexpr int_t calc_div_error(int_t min, int_t max, int error, int in_precision, int out_precision)
 		{
-			return std::ceil(full_error * std::pow(2.0, out_precision) * (
+			return ceil(full_error * std::pow(2.0, out_precision) * (
 				1/(bound(min, max) - (error/(full_error*std::pow(2.0, in_precision)))) -
 				1/(bound(min, max))
 			));

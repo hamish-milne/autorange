@@ -42,11 +42,14 @@
 		<Linker>
 			<Add library="UnitTest++\Deliv\Release\libUnitTest++.a" />
 		</Linker>
+		<Unit filename="src/ac_int_default.hpp" />
 		<Unit filename="src/arpea_core.hpp" />
 		<Unit filename="src/fixed_const.hpp" />
+		<Unit filename="src/fixed_const_ops.hpp" />
 		<Unit filename="src/fixed_ops.hpp" />
 		<Unit filename="src/fixed_type.hpp" />
 		<Unit filename="src/helpers.hpp" />
+		<Unit filename="src/internal/fixed_const_op_types.hpp" />
 		<Unit filename="src/internal/fixed_op_types.hpp" />
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/mainpage.dox" />

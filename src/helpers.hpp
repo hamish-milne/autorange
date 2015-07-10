@@ -3,6 +3,10 @@
 
 #include <cstdint>
 #include <cmath>
+#include <climits>
+#include <stdexcept>
+
+#include "arpea_core.hpp"
 
 namespace arpea
 {
@@ -68,21 +72,19 @@ namespace arpea
 	 * \param v  The value to round
 	 * \return `v` rounded up to the nearest integer, or truncated if already one
 	 */
-	constexpr int64_t ceil(double v)
+	constexpr int_t ceil(real_t v)
 	{
-		return (v - int64_t(v)) > 0 ? int64_t(v)+1 : int64_t(v);
+		return (v - int_t(v)) > 0 ? int_t(v)+1 : int_t(v);
 	}
 
-	/** \brief Calculates the base 2 logarithm of the input
+	/** \brief A `log2` function more suitable for calculating range and precision
 	 *
 	 * \param v  The input value
-	 * \return The upward-rounded log2
+	 * \return `log2(v)` rounded outward (more positive or more negative)
 	 */
-	constexpr int64_t log2(double v)
+	constexpr int_t clog2(real_t v)
 	{
-		#define M_LOG2 1.442695040888963407359924681
-		return ceil(std::log(v)*M_LOG2);
-		#undef M_LOG2
+		return (v < 1 ? -1 : 1) * ceil(std::log2(v < 1 ? (real_t)1/v : v));
 	}
 
 	/** \brief Calculates 2 to the input power
@@ -112,10 +114,56 @@ namespace arpea
 	 * \param e  The maximum deviation from the true value
 	 * \return The binary precision required
 	 */
-	constexpr int P(double e)
+	constexpr int P(real_t e)
 	{
-		return -log2(std::abs(e));
+		return -clog2(std::abs(e));
 	}
+
+	static constexpr bool check_exp(int exp)
+	{
+		return (exp >= -0x80 && exp < 0x80);
+	}
+
+	static constexpr int_t calc_exp(real_t real)
+	{
+		return clog2(std::abs(real));
+	}
+
+	typedef int8_t exp_t;
+
+#define EXPONENT_BITS (CHAR_BIT*sizeof(exp_t))
+#define MANTISSA_BITS (8*sizeof(uint_t) - EXPONENT_BITS)
+#define MANTISSA_MASK (uint_t(-1) >> EXPONENT_BITS)
+
+	/** \brief Converts a real number into data that can be used by templates
+	 *
+	 * This function packs an exponent and mantissa into a single uint_t. The
+	 * data is formatted with the exponent first, allowing positive integers to
+	 * be encoded normally.
+	 */
+	static constexpr uint_t R(real_t real)
+	{
+		return check_exp(calc_exp(real)) ? (
+			(calc_exp(real) << MANTISSA_BITS)
+				|
+			((uint_t)ceil(real * pow2(real_t(MANTISSA_BITS - calc_exp(real)))) >> EXPONENT_BITS)
+		) : (
+			throw std::logic_error("R: Floating point under/overflow")
+		);
+	}
+
+	/** \brief Converts the output of `R` back to a real number
+	 *
+	 */
+	static constexpr real_t parse_R(uint_t data)
+	{
+		return ((data & MANTISSA_MASK) << EXPONENT_BITS) *
+			pow2((real_t)(exp_t)(data >> MANTISSA_BITS) - MANTISSA_BITS);
+	}
+
+#undef EXPONENT_BITS
+#undef MANTISSA_MASK
+#undef MANTISSA_BITS
 
 	/**
 	 * @}

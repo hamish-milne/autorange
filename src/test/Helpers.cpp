@@ -25,13 +25,14 @@ namespace
 		CHECK_EQUAL(INT_MIN, min(1, -1, INT_MIN, 0));
 	}
 
-	using arpea::log2;
-	TEST(Log2)
+	using arpea::clog2;
+	TEST(clog2)
 	{
-		CHECK_EQUAL(0, log2(1));
-		CHECK_EQUAL(1, log2(1.01));
-		CHECK_EQUAL(8, log2(256));
-		CHECK_EQUAL(-8, log2(1.0/256.0));
-		CHECK_EQUAL(0, log2(0.51));
+		CHECK_EQUAL(0, clog2(1));
+		CHECK_EQUAL(1, clog2(1.01));
+		CHECK_EQUAL(8, clog2(256));
+		CHECK_EQUAL(-8, clog2((real_t)1.0/(real_t)256.0));
+		CHECK_EQUAL(-9, clog2((real_t)1.0/(real_t)257.0));
+		CHECK_EQUAL(-1, clog2(0.51));
 	}
 }

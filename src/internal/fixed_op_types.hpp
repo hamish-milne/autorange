@@ -17,9 +17,15 @@ namespace arpea
 	namespace internal
 	{
 		/// TODO: Add base operator type
+		template<class A, class B>
+		struct fixed_op_base
+		{
+			static_assert(std::is_same<typename A::policy, typename B::policy>::value,
+							"Policies must be the same");
+		};
 
 		template<class A, class B>
-		struct add_type
+		struct add_type : fixed_op_base<A, B>
 		{
 			static_assert(std::is_same<typename A::policy, typename B::policy>::value,
 							"Policies must be the same");
@@ -55,6 +61,13 @@ namespace arpea
 						  policy,
 						  e_set.error
 						  > sub_t;
+
+			static add_t add(A a, B b)
+			{
+				return add_t::create(
+					shift(typename add_t::utype(a.n), shiftA) +
+					shift(typename add_t::utype(b.n), shiftB));
+			}
 		};
 
 		BINARY_OP_TEMPLATE

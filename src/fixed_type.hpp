@@ -86,11 +86,11 @@ namespace arpea
 		{
 		}
 
-		constexpr fixed(real_t d) : fixed(calc_n(d), false)
+		explicit constexpr fixed(real_t d) : fixed(calc_n(d), false)
 		{
 		}
 
-		constexpr operator real_t()
+		explicit constexpr operator real_t()
 		{
 			return step * n;
 		}

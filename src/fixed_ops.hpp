@@ -7,17 +7,11 @@ using namespace arpea::internal;
 
 namespace arpea
 {
-	BINARY_OP_TEMPLATE
-	constexpr auto
-	operator+(fixed<minA, maxA, precisionA, policy, errorA> a,
-			  fixed<minB, maxB, precisionB, policy, errorB> b)
-		-> typename add_type<decltype(a), decltype(b)>::add_t
+	template<typename A, typename B>
+	constexpr auto operator+(A a, B b)
+		-> typename add_type<A, B>::add_t
 	{
-		typedef add_type<decltype(a), decltype(b)> add_result;
-		typedef typename add_result::add_t::utype utype;
-		return add_result::add_t::create(
-				 shift(utype(a.n), add_result::shiftA)
-			   + shift(utype(b.n), add_result::shiftB));
+		return add_type<A, B>::add(a, b);
 	}
 
 	BINARY_OP_TEMPLATE

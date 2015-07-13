@@ -7,55 +7,35 @@ using namespace arpea::internal;
 
 namespace arpea
 {
-	template<typename A, typename B>
-	constexpr auto operator+(A a, B b)
-		-> typename add_type<A, B>::add_t
+	template<class A, class B>
+	constexpr typename add_type<A, B>::add_t operator+(A a, B b)
 	{
 		return add_type<A, B>::add(a, b);
 	}
 
-	BINARY_OP_TEMPLATE
-	#define MUL_RESULT mul_type<policy, minA, maxA, precisionA, errorA, \
-										minB, maxB, precisionB, errorB>
-	typename MUL_RESULT::type
-	operator*(fixed<minA, maxA, precisionA, policy, errorA> a,
-			  fixed<minB, maxB, precisionB, policy, errorB> b)
+	template<class A, class B>
+	constexpr typename add_type<A, B>::sub_t operator-(A a, B b)
 	{
-		return MUL_RESULT::type::create(shift(a.n * b.n, MUL_RESULT::shift));
-	}
-	#undef MUL_RESULT
-
-	UNARY_OP_TEMPLATE
-	#define NEG_RESULT fixed<-_max, -_min, precision, policy, error>
-	NEG_RESULT
-	operator-(fixed<_min, _max, precision, policy, error> a)
-	{
-		return NEG_RESULT::create(-a.n);
-	}
-	#undef NEG_RESULT
-
-	BINARY_OP_TEMPLATE
-	constexpr auto
-	operator-(fixed<minA, maxA, precisionA, policy, errorA> a,
-	          fixed<minB, maxB, precisionB, policy, errorB> b)
-		-> typename add_type<decltype(a), decltype(b)>::sub_t
-	{
-		using sub_result = typename add_type<decltype(a), decltype(b)>::sub_t;
-		return sub_result::create(
-				 shift(a.n, sub_result::shiftA)
-			   - shift(b.n, sub_result::shiftB));
+		return add_type<A, B>::sub(a, b);
 	}
 
-	BINARY_OP_TEMPLATE
-	#define DIV_TYPE div_type<policy, minA, maxA, precisionA, errorA, \
-									  minB, maxB, precisionB, errorB>
-	constexpr typename DIV_TYPE::type
-	operator/(fixed<minA, maxA, precisionA, policy, errorA> a,
-	          fixed<minB, maxB, precisionB, policy, errorB> b)
+	template<class A, class B>
+	constexpr typename mul_type<A, B>::type operator*(A a, B b)
 	{
-		return DIV_TYPE::type::create(shift(shift(a.n, DIV_TYPE::shiftA) / b.n, DIV_TYPE::shiftC));
+		return mul_type<A, B>::mul(a, b);
 	}
-	#undef DIV_TYPE
+
+	template<class A>
+	constexpr typename neg_type<A>::type operator-(A a)
+	{
+		return neg_type<A>::neg(a);
+	}
+
+	template<class A, class B>
+	constexpr typename div_type<A, B>::type operator/(A a, B b)
+	{
+		return div_type<A, B>::div(a, b);
+	}
 
 	template<int _root, int_t _min, int_t _max, int precision, class policy, int error>
 	#define ROOT_TYPE root_type<_root, _min, _max, precision, policy, error>

@@ -16,16 +16,8 @@ namespace arpea
 {
 	namespace internal
 	{
-		/// TODO: Add base operator type
 		template<class A, class B>
-		struct fixed_op_base
-		{
-			static_assert(std::is_same<typename A::policy, typename B::policy>::value,
-							"Policies must be the same");
-		};
-
-		template<class A, class B>
-		struct add_type : fixed_op_base<A, B>
+		struct add_type
 		{
 			static_assert(std::is_same<typename A::policy, typename B::policy>::value,
 							"Policies must be the same");
@@ -70,75 +62,92 @@ namespace arpea
 			}
 		};
 
-		BINARY_OP_TEMPLATE
+		template<class A>
+		struct neg_type
+		{
+			typedef fixed<-A::max, -A::min, A::precision, typename A::policy, A::error> type;
+
+			constexpr type neg(A a)
+			{
+				return type::create(-type::utype(a.n));
+			}
+		};
+
+		template<class A, class B>
 		struct mul_type
 		{
+			static_assert(std::is_same<typename A::policy, typename B::policy>::value,
+							"Policies must be the same");
+
+			typedef typename A::policy policy;
+
 		private:
-			static constexpr int base_precision = precisionA + precisionB;
+			static constexpr int base_precision = A::precision + B::precision;
 			static constexpr int_t base_error = ceil(
-				(real_t)(errorB * (real_t)max((int_t)std::abs(minA), maxA)) +
-				(real_t)(errorA * (real_t)max((int_t)std::abs(minB), maxB)) +
-				(real_t)(errorA * errorB / policy::full_error));
+				(real_t)(B::error * (real_t)max((int_t)std::abs(A::min), A::max)) +
+				(real_t)(A::error * (real_t)max((int_t)std::abs(B::min), B::max)) +
+				(real_t)(A::error * B::error / policy::full_error));
 
 			static constexpr error_set e_set = policy::truncate_error(base_precision, base_error);
 
 		public:
-			static constexpr int shift = e_set.precision - base_precision;
 
-			typedef fixed<min(minA*minB, maxA*minB, minA*maxB, maxA*maxB),
-						  max(minA*minB, maxA*minB, minA*maxB, maxA*maxB),
+			typedef fixed<min(A::min*B::min, A::max*B::min, A::min*B::max, A::max*B::max),
+						  max(A::min*B::min, A::max*B::min, A::min*B::max, A::max*B::max),
 						  e_set.precision,
 						  policy,
 						  e_set.error
 						  > type;
 
+			static constexpr type mul(A a, B b)
+			{
+				return type::create(shift(typename type::utype(a.n * b.n),
+					e_set.precision - base_precision));
+			}
+
 		};
 
-		UNARY_OP_TEMPLATE
+		template<class A>
 		struct inv_type
 		{
 		private:
-			typedef fixed<_min, _max, precision, policy, error> in_type;
+			static constexpr int base_precision = max(A::precision, (int)clog2(max((int_t)std::abs(A::min), A::max)));
+			static constexpr int base_error = A::policy::calc_div_error(A::min, A::max, A::error, A::precision, base_precision);
 
-			static constexpr int base_precision = max(precision, (int)clog2(max((int_t)std::abs(_min), _max)));
-			static constexpr int base_error = policy::calc_div_error(_min, _max, error, precision, base_precision);
-
-			static constexpr error_set e_set = policy::truncate_error(base_precision, base_error);
+			static constexpr error_set e_set = A::policy::truncate_error(base_precision, base_error);
 
 			static constexpr int_t new_min = (int_t)std::floor(1.0/(
-				(_min >= 0 || _max < 0) ? _max : -std::pow(2.0, -precision)));
+				(A::min >= 0 || A::max < 0) ? A::max : -std::pow(2.0, -A::precision)));
 			static constexpr int_t new_max = ceil(1.0/(
-				(_min >  0 || _max < 0) ? _min :  std::pow(2.0, -precision)));
+				(A::min >  0 || A::max < 0) ? A::min :  std::pow(2.0, -A::precision)));
 
 		public:
 
 			typedef fixed<new_min,
 						  new_max,
 						  e_set.precision,
-						  policy,
+						  typename A::policy,
 						  e_set.error
 						  > type;
 
-			static constexpr int shiftN = type::precision + precision;
+			static constexpr int shiftN = type::precision + A::precision;
 		};
 
-		BINARY_OP_TEMPLATE
+		template<class A, class B>
 		struct div_type
 		{
 		private:
-			typedef fixed<minA, maxA, precisionA, policy, errorA> num_type;
-			typedef inv_type<policy, minB, maxB, precisionB, errorB> inv_t;
-			typedef typename inv_t::type den_type;
-			typedef mul_type<policy,
-				num_type::min, num_type::max, num_type::precision, num_type::error,
-				den_type::min, den_type::max, den_type::precision, den_type::error
-				> mul_result;
+			typedef mul_type<A, typename inv_type<B>::type> mul_result;
 
 		public:
-
-			static constexpr int shiftA = inv_t::shiftN;
-			static constexpr int shiftC = mul_result::shift;
 			typedef typename mul_result::type type;
+
+			constexpr type div(A a, B b)
+			{
+				return type::create(shift(shift(
+					typename type::utype(a.n), inv_type<B>::type::shiftN) /
+					typename type::utype(b.n), mul_result::shift));
+			}
 		};
 
 		template<int root, int_t _min, int_t _max, int precision, class policy, int error>

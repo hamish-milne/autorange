@@ -152,18 +152,12 @@
 		e_c = f\cdot 2^{p_a+p_c}\cdot \left(\frac{1}{bound(n_a) - \frac{e_a}{f}} - \frac{1}{bound(n_a)}\right)
 	\end{equation}
 	
-	Secondly, we need to consider the error. This becomes difficult when $n_a$ can be zero, as the error becomes very large, increasing with precision. There's no absolute solution, but one thing we can do is use an approximate lower bound; I chose a default value of $\frac{2^{p_a}}{5}$. Of course if the min-max values don't cover zero, we can just use the smallest of these as our bound.
+	Secondly, we need to consider the error. This becomes difficult when $n_a$ can be zero, as the error becomes undefined. As a result, I chose to disallow division by values whose range includes zero (i.e. we require $min_a > 0 \text{or} max_a < 0$). The lower bound is then the smallest absolute minimum or maximum.
 	
 	\begin{eqnarray}
-		bound(n_a) = max\left(min(abs(max_a),abs(min_a)), \frac{2^{p_a}}{5}\right) \\
-		min_c = \begin{cases}
-			1/max_a & \text{if } min_a > 0 \text{ or } max_a < 0 \\
-			-2^{p_a} & \text{otherwise}
-		\end{cases} \\
-		max_c = \begin{cases}
-			1/min_a & \text{if } min_a > 0 \text{ or } max_a < 0 \\
-			2^{p_a} & \text{otherwise}
-		\end{cases}
+		bound(n_a) = min(abs(max_a),abs(min_a)) \\
+		min_c = 1/max_a \\
+		max_c = 1/min_a
 	\end{eqnarray}
 	
 	\subsection{Division}

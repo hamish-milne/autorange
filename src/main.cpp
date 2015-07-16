@@ -21,11 +21,11 @@ struct new_fixed_policy : fixed_policy
 
 int main()
 {
-	fixed<0, 255, 16> a(0.1);
-	integer<0, 2> b(1);
+	fixed<1, 255, 16> a(1.001);
+	integer<1, 20> b(5);
 
-	//auto c = b/a;
-	//cout << c.min << ' ' << c.max << ' ' << c.precision << ' ' << real_t(c) << endl;
+	auto c = b/a;
+	cout << c.min << ' ' << c.max << ' ' << c.precision << ' ' << real_t(c) << endl;
 
 	cout.precision(16);
 	//fixed_const<R(0.0000012345678901234567890)> d;

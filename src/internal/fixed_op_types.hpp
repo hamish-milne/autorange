@@ -1,7 +1,7 @@
 #ifndef FIXED_OP_TYPES_HPP
 #define FIXED_OP_TYPES_HPP
 
-#include "..\fixed_type.hpp"
+#include "../fixed_type.hpp"
 
 #include <type_traits>
 
@@ -29,9 +29,6 @@ namespace arpea
 
 			static constexpr error_set e_set = policy::truncate_error(base_precision, base_error);
 
-			static constexpr int shiftA = e_set.precision - A::precision;
-			static constexpr int shiftB = e_set.precision - B::precision;
-
 		public:
 			typedef fixed<A::min+B::min,
 						  A::max+B::max,
@@ -49,16 +46,12 @@ namespace arpea
 
 			static add_t add(A a, B b)
 			{
-				return add_t::create(
-					shift(typename add_t::utype(a.n), shiftA) +
-					shift(typename add_t::utype(b.n), shiftB));
+				return add_t::create(add_t::conv_utype(a) + add_t::conv_utype(b));
 			}
 
 			static sub_t sub(A a, B b)
 			{
-				return sub_t::create(
-					shift(typename sub_t::utype(a.n), shiftA) -
-					shift(typename sub_t::utype(b.n), shiftB));
+				return sub_t::create(add_t::conv_utype(a) - add_t::conv_utype(b));
 			}
 		};
 
@@ -84,8 +77,8 @@ namespace arpea
 		private:
 			static constexpr int base_precision = A::precision + B::precision;
 			static constexpr int_t base_error = ceil(
-				(real_t)(B::error * (real_t)max((int_t)std::abs(A::min), A::max)) +
-				(real_t)(A::error * (real_t)max((int_t)std::abs(B::min), B::max)) +
+				(real_t)(B::error * (real_t)max((int_t)abs(A::min), A::max)) +
+				(real_t)(A::error * (real_t)max((int_t)abs(B::min), B::max)) +
 				(real_t)(A::error * B::error / policy::full_error));
 
 			static constexpr error_set e_set = policy::truncate_error(base_precision, base_error);
@@ -99,10 +92,11 @@ namespace arpea
 						  e_set.error
 						  > type;
 
+            static constexpr int shiftN = e_set.precision - base_precision;
+
 			static constexpr type mul(A a, B b)
 			{
-				return type::create(shift(typename type::utype(a.n * b.n),
-					e_set.precision - base_precision));
+				return type::create(shift(typename type::utype(a.n * b.n), shiftN));
 			}
 
 		};
@@ -110,18 +104,17 @@ namespace arpea
 		template<class A>
 		struct inv_type
 		{
-			static_assert(B::min > 0 || B::max < 0, "Cannot divide by zero");
+			static_assert(A::min > 0 || A::max < 0, "Cannot divide by zero");
 
 		private:
-			static constexpr int base_precision = max(A::precision, (int)clog2(max((int_t)std::abs(A::min), A::max)));
-			static constexpr int base_error = A::policy::calc_div_error(A::min, A::max, A::error, A::precision, base_precision);
+			static constexpr int base_precision = max(A::precision, (int)clog2(max((int_t)abs(A::min), A::max)));
+			static constexpr int_t bound = min(abs(A::min), abs(A::max));
+			static constexpr int base_error = A::error;
 
 			static constexpr error_set e_set = A::policy::truncate_error(base_precision, base_error);
 
-			static constexpr int_t new_min = (int_t)std::floor(1.0/(
-				(A::min >= 0 || A::max < 0) ? A::max : -std::pow(2.0, -A::precision)));
-			static constexpr int_t new_max = ceil(1.0/(
-				(A::min >  0 || A::max < 0) ? A::min :  std::pow(2.0, -A::precision)));
+			static constexpr int_t new_min = (int_t)std::floor(1.0/A::max);
+			static constexpr int_t new_max = ceil(1.0/A::min);
 
 		public:
 
@@ -144,11 +137,11 @@ namespace arpea
 		public:
 			typedef typename mul_result::type type;
 
-			constexpr type div(A a, B b)
+			static constexpr type div(A a, B b)
 			{
 				return type::create(shift(shift(
-					typename type::utype(a.n), inv_type<B>::type::shiftN) /
-					typename type::utype(b.n), mul_result::shift));
+					typename type::utype(a.n), inv_type<B>::shiftN) /
+					typename type::utype(b.n), mul_result::shiftN));
 			}
 		};
 

@@ -50,6 +50,12 @@ namespace arpea
 		typedef int_t utype;
 		utype n;
 
+		template<class A>
+		static constexpr utype conv_utype(A a)
+		{
+            return shift(utype(a.n), precision - A::precision);
+		}
+
 	private:
 
 		static constexpr utype sign_extend_const = (utype)-1 << (size - 1);

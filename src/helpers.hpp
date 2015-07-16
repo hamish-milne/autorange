@@ -109,6 +109,12 @@ namespace arpea
 		return s < 0 ? v >> -s : v << s;
 	}
 
+	template<typename T>
+	constexpr T abs(T v)
+	{
+        return v < 0 ? -v : v;
+	}
+
 	/** \brief Calculates the required precision to get the given maximum error
 	 *
 	 * \param e  The maximum deviation from the true value
@@ -116,7 +122,7 @@ namespace arpea
 	 */
 	constexpr int P(real_t e)
 	{
-		return -clog2(std::abs(e));
+		return -clog2(abs(e));
 	}
 
 	static constexpr bool check_exp(int exp)
@@ -126,7 +132,7 @@ namespace arpea
 
 	static constexpr int_t calc_exp(real_t real)
 	{
-		return clog2(std::abs(real));
+		return clog2(abs(real));
 	}
 
 	typedef int8_t exp_t;

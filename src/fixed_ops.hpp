@@ -47,7 +47,4 @@ namespace arpea
 
 }
 
-#undef BINARY_OP_TEMPLATE
-#undef UNARY_OP_TEMPLATE
-
 #endif

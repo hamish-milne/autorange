@@ -5,13 +5,6 @@
 
 #include <type_traits>
 
-#define BINARY_OP_TEMPLATE template<class policy, \
-	int_t minA, int_t maxA, int precisionA, int errorA, \
-	int_t minB, int_t maxB, int precisionB, int errorB>
-
-#define UNARY_OP_TEMPLATE template<class policy, \
-	int_t _min, int_t _max, int precision, int error>
-
 namespace arpea
 {
 	namespace internal
@@ -36,10 +29,10 @@ namespace arpea
 
 			static constexpr error_set e_set = policy::truncate_error(base_precision, base_error);
 
-		public:
 			static constexpr int shiftA = e_set.precision - A::precision;
 			static constexpr int shiftB = e_set.precision - B::precision;
 
+		public:
 			typedef fixed<A::min+B::min,
 						  A::max+B::max,
 						  e_set.precision,
@@ -59,6 +52,13 @@ namespace arpea
 				return add_t::create(
 					shift(typename add_t::utype(a.n), shiftA) +
 					shift(typename add_t::utype(b.n), shiftB));
+			}
+
+			static sub_t sub(A a, B b)
+			{
+				return sub_t::create(
+					shift(typename sub_t::utype(a.n), shiftA) -
+					shift(typename sub_t::utype(b.n), shiftB));
 			}
 		};
 
@@ -110,6 +110,8 @@ namespace arpea
 		template<class A>
 		struct inv_type
 		{
+			static_assert(B::min > 0 || B::max < 0, "Cannot divide by zero");
+
 		private:
 			static constexpr int base_precision = max(A::precision, (int)clog2(max((int_t)std::abs(A::min), A::max)));
 			static constexpr int base_error = A::policy::calc_div_error(A::min, A::max, A::error, A::precision, base_precision);

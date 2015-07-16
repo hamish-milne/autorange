@@ -13,6 +13,11 @@ namespace arpea
 
 		static constexpr real_t error = parse_R(real_error);
 
+		static constexpr int_t get_int(int precision)
+		{
+			return std::round(value * std::pow(2, precision));
+		}
+
 		constexpr fixed_const()
 		{
 		}

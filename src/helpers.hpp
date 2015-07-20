@@ -80,11 +80,16 @@ namespace arpea
 	/** \brief A `log2` function more suitable for calculating range and precision
 	 *
 	 * \param v  The input value
-	 * \return `log2(v)` rounded outward (more positive or more negative)
+	 * \param round_out  If true, round negative values to be more negative
+	 * \return `log2(v)` rounded appropriately
 	 */
-	constexpr int_t clog2(real_t v)
+	constexpr int_t clog2(real_t v, bool round_out = true)
 	{
-		return (v < 1 ? -1 : 1) * ceil(std::log2(v < 1 ? (real_t)1/v : v));
+		return round_out ? (
+            (v < 1 ? -1 : 1) * ceil(std::log2(v < 1 ? (real_t)1/v : v))
+        ) : (
+            ceil(std::log2(v))
+        );
 	}
 
 	/** \brief Calculates 2 to the input power
@@ -137,39 +142,51 @@ namespace arpea
 
 	typedef int8_t exp_t;
 
-#define EXPONENT_BITS (CHAR_BIT*sizeof(exp_t))
-#define MANTISSA_BITS (8*sizeof(uint_t) - EXPONENT_BITS)
-#define MANTISSA_MASK (uint_t(-1) >> EXPONENT_BITS)
+    typedef uintmax_t encoded_real;
+
+
+    constexpr int exponent_bits = CHAR_BIT * sizeof(exp_t) + 1;
+    constexpr int mantissa_bits = CHAR_BIT * sizeof(encoded_real) - exponent_bits;
+    constexpr encoded_real mantissa_mask = ~encoded_real(0) >> exponent_bits;
+    constexpr encoded_real sign_bit = encoded_real(1) << (CHAR_BIT * sizeof(encoded_real) - 1);
+
+    static constexpr encoded_real R_abs(real_t real)
+    {
+        return real == 0 ? 0 : (check_exp(calc_exp(real)) ? (
+                ((calc_exp(real) << mantissa_bits) & ~sign_bit)
+                    |
+                ((encoded_real)ceil(real * pow2(real_t(mantissa_bits - calc_exp(real)))) >> exponent_bits)
+            ) : (
+                throw std::logic_error("R: Floating point under/overflow")
+            ));
+    }
 
 	/** \brief Converts a real number into data that can be used by templates
 	 *
-	 * This function packs an exponent and mantissa into a single uint_t. The
+	 * This function packs an exponent and mantissa into a single `uint_t`. The
 	 * data is formatted with the exponent first, allowing positive integers to
 	 * be encoded normally.
 	 */
-	static constexpr uint_t R(real_t real)
+	static constexpr encoded_real R(real_t real)
 	{
-		return check_exp(calc_exp(real)) ? (
-			(calc_exp(real) << MANTISSA_BITS)
-				|
-			((uint_t)ceil(real * pow2(real_t(MANTISSA_BITS - calc_exp(real)))) >> EXPONENT_BITS)
-		) : (
-			throw std::logic_error("R: Floating point under/overflow")
-		);
+		return real < 0 ? (R_abs(-real) | sign_bit) : R_abs(real);
 	}
 
 	/** \brief Converts the output of `R` back to a real number
 	 *
 	 */
-	static constexpr real_t parse_R(uint_t data)
+	static constexpr real_t parse_R(encoded_real data)
 	{
-		return ((data & MANTISSA_MASK) << EXPONENT_BITS) *
-			pow2((real_t)(exp_t)(data >> MANTISSA_BITS) - MANTISSA_BITS);
+		return
+            ((data & sign_bit) ? -1 : 1) *
+            (int_t)((data & mantissa_mask) << exponent_bits) *
+			pow2((real_t)(exp_t)((data & ~sign_bit) >> mantissa_bits) - mantissa_bits);
 	}
 
-#undef EXPONENT_BITS
-#undef MANTISSA_MASK
-#undef MANTISSA_BITS
+    static constexpr int_t to_int(real_t value, int precision)
+    {
+        return std::round(value * std::pow(2, precision));
+    }
 
 	/**
 	 * @}

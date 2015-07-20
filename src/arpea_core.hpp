@@ -5,8 +5,13 @@
 
 namespace arpea
 {
+    /** \brief A large signed integer type */
 	typedef intmax_t int_t;
+
+	/** \brief A large unsigned integer type */
 	typedef uintmax_t uint_t;
+
+	/** \brief A precise floating point type */
 	typedef long double real_t;
 
 	template<int_t Num, int_t Den>

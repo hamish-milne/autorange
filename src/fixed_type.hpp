@@ -9,17 +9,18 @@
 namespace arpea
 {
 	template<
-		int_t Min,
-		int_t Max,
+		encoded_real Min,
+		encoded_real Max,
 		int Precision = 0,
 		class Policy = fixed_policy,
 		int Error = Policy::default_error
 		>
 	struct fixed
 	{
-		static constexpr int_t min = Min;
-		static constexpr int_t max = Max;
 		static constexpr int precision = Precision;
+        static constexpr real_t step = pow2(-(real_t)precision);
+		static constexpr real_t min = parse_R(Min);
+		static constexpr real_t max = parse_R(Max) - (step >= 1 ? 0 : step);
 		static constexpr int error = Error;
 		static constexpr bool is_signed = min < 0;
 		typedef Policy policy;
@@ -28,19 +29,20 @@ namespace arpea
 
 		static constexpr int calc_negative_size()
 		{
-			return min >= 0 ? 0 : (clog2(-min) + 1);
+			return min >= 0 ? 0 : (clog2(-min, false) + 1);
 		}
 
 		static constexpr int calc_positive_size()
 		{
-			return max == -1 ? 0 : (clog2(max + 1) + (is_signed ? 1 : 0));
+            /// TODO: Add overload to clog2 to accommodate negative integer sizes
+			return max <= 0 ? 0 : (clog2(max, false) + (is_signed ? 1 : 0));
 		}
 
 		static constexpr int_t pshift = pow2((int_t)precision);
-		static constexpr real_t step = pow2(-(real_t)precision);
 
 	public:
 
+        /// Integral _can_ be negative. This would happen if our min and max values were very small
 		static constexpr int integral = arpea::max(calc_negative_size(), calc_positive_size());
 		static constexpr int size = integral + precision;
 		static constexpr int_t integral_min = is_signed ? -pow2(integral) : 0;
@@ -108,8 +110,8 @@ namespace arpea
 
 	};
 
-	template<int_t Min, int_t Max>
-	using integer = fixed<Min, Max, 0, fixed_policy, 0>;
+	template<int_t Min, int_t Max, class Policy = fixed_policy>
+	using integer = fixed<R(Min), R(Max), 0, Policy, 0>;
 }
 
 #endif

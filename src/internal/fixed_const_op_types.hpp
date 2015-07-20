@@ -44,14 +44,19 @@ namespace arpea
 
 	};
 
+    constexpr real_t calc_mul_error<class A, class B>(real_t bValue)
+    {
+        return ceil(
+            (real_t)(B::error * (real_t)max((int_t)std::abs(A::min), A::max)) +
+            (real_t)(A::error * bValue) +
+            (real_t)(A::error * B::error / A::policy::full_error));
+    }
+
 	template<class A, class B>
 	struct const_mul_type
 	{
 	private:
-		static constexpr int base_error = ceil(
-				(real_t)(B::error * (real_t)max((int_t)std::abs(A::min), A::max)) +
-				(real_t)(A::error * B::value) +
-				(real_t)(A::error * B::error / policy::full_error));
+		static constexpr int base_error = calc_mul_error<A, B>(B::value);
 		static constexpr error_set e_set = A::policy::truncate_error(A::precision, base_error);
 
 	public:
@@ -95,9 +100,38 @@ namespace arpea
     public:
         static constexpr type div(A a)
         {
-            return type::create(b_n / a.n);
+            return type::create(b_n / type::conv_utype(a.n));
         }
 	};
+
+	template<class A, class B>
+	struct div_by_const_type
+	{
+        static_assert(std::abs(B::value) > A::step, "Constant divisor is too small");
+
+    private:
+        static constexpr real_t bValue = 1.0 / B::value;
+        static constexpr int base_error = calc_mul_error<A, B>(bValue);
+		static constexpr error_set e_set = A::policy::truncate_error(A::precision, base_error);
+
+	public:
+		typedef fixed<
+			max(A::max*bValue, A::min*bValue),
+			min(A::max*bValue, A::min*bValue),
+			e_set.precision,
+			A::policy,
+			e_set.error> type;
+
+	private:
+		static constexpr typename type::utype b_n = to_int(bValue, e_set.precision);
+
+	public:
+		static constexpr type div_const(A a)
+		{
+			return type::create(type::conv_utype(a.n) * b_n);
+		}
+
+	}
 }
 
 #endif

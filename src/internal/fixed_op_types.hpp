@@ -30,15 +30,15 @@ namespace arpea
 			static constexpr error_set e_set = policy::truncate_error(base_precision, base_error);
 
 		public:
-			typedef fixed<A::min+B::min,
-						  A::max+B::max,
+			typedef fixed<R(A::min+B::min),
+						  R(A::max+B::max),
 						  e_set.precision,
 						  policy,
 						  e_set.error
 						  > add_t;
 
-			typedef fixed<A::min-B::max,
-						  A::max-B::min,
+			typedef fixed<R(A::min-B::max),
+						  R(A::max-B::min),
 						  e_set.precision,
 						  policy,
 						  e_set.error
@@ -77,16 +77,16 @@ namespace arpea
 		private:
 			static constexpr int base_precision = A::precision + B::precision;
 			static constexpr int_t base_error = ceil(
-				(real_t)(B::error * (real_t)max((int_t)abs(A::min), A::max)) +
-				(real_t)(A::error * (real_t)max((int_t)abs(B::min), B::max)) +
+				(real_t)(B::error * max(abs(A::min), A::max)) +
+				(real_t)(A::error * max(abs(B::min), B::max)) +
 				(real_t)(A::error * B::error / policy::full_error));
 
 			static constexpr error_set e_set = policy::truncate_error(base_precision, base_error);
 
 		public:
 
-			typedef fixed<min(A::min*B::min, A::max*B::min, A::min*B::max, A::max*B::max),
-						  max(A::min*B::min, A::max*B::min, A::min*B::max, A::max*B::max),
+			typedef fixed<R(min(A::min*B::min, A::max*B::min, A::min*B::max, A::max*B::max)),
+						  R(max(A::min*B::min, A::max*B::min, A::min*B::max, A::max*B::max)),
 						  e_set.precision,
 						  policy,
 						  e_set.error
@@ -107,19 +107,16 @@ namespace arpea
 			static_assert(A::min > 0 || A::max < 0, "Cannot divide by zero");
 
 		private:
-			static constexpr int base_precision = max(A::precision, (int)clog2(max((int_t)abs(A::min), A::max)));
-			static constexpr int_t bound = min(abs(A::min), abs(A::max));
+			static constexpr int base_precision = max(A::precision, (int)clog2(max(abs(A::min), A::max)));
+			static constexpr real_t bound = min(abs(A::min), abs(A::max));
 			static constexpr int base_error = A::error;
 
 			static constexpr error_set e_set = A::policy::truncate_error(base_precision, base_error);
 
-			static constexpr int_t new_min = (int_t)std::floor(1.0/A::max);
-			static constexpr int_t new_max = ceil(1.0/A::min);
-
 		public:
 
-			typedef fixed<new_min,
-						  new_max,
+			typedef fixed<R(1.0/A::max),
+						  R(1.0/A::min),
 						  e_set.precision,
 						  typename A::policy,
 						  e_set.error

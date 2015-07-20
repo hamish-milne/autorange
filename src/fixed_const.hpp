@@ -15,7 +15,7 @@ namespace arpea
 
 		static constexpr int_t get_int(int precision)
 		{
-			return std::round(value * std::pow(2, precision));
+			return to_int(value, precision);
 		}
 
 		constexpr fixed_const()

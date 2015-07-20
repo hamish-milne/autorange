@@ -14,23 +14,21 @@ using std::endl;
 
 using namespace arpea::internal;
 
-struct new_fixed_policy : fixed_policy
-{
-
-};
-
 int main()
 {
-	fixed<1, 255, 16> a(1.001);
+	fixed<R(1), R(255), 16, fixed_policy, 100> a(1.001);
 	integer<1, 20> b(5);
 
-	auto c = b/a;
+	auto c = a/b;
+
+    cout << a.min << ' ' << a.max << endl;
 	cout << c.min << ' ' << c.max << ' ' << c.precision << ' ' << real_t(c) << endl;
 
-	cout.precision(16);
+    cout << parse_R(R(0.0001)) << endl;
+	//cout.precision(16);
 	//fixed_const<R(0.0000012345678901234567890)> d;
 	//cout << d.value << endl;
-	cout << typeid(decltype(a + b)).name() << endl;
+	//cout << typeid(decltype(a + b)).name() << endl;
 
 	//cout << typeid(ac_int_default<6, false>::type).name() <<  ' ' << sizeof(real_t) << endl;
 

@@ -2,40 +2,40 @@
 #define FIXED_OPS_HPP
 
 #include "internal/fixed_op_types.hpp"
+#include <type_traits>
 
 using namespace arpea::internal;
 
 namespace arpea
 {
-	template<class A, class B>
-	constexpr typename add_type<A, B>::add_t operator+(A a, B b)
-	{
-		return add_type<A, B>::add(a, b);
-	}
 
-	template<class A, class B>
-	constexpr typename add_type<A, B>::sub_t operator-(A a, B b)
-	{
-		return add_type<A, B>::sub(a, b);
-	}
+#define FIXED_OP(op, tname, fname) template< \
+        encoded_real Min1, encoded_real Max1, int Precision1, int Error1, \
+        encoded_real Min2, encoded_real Max2, int Precision2, int Error2, \
+        class Policy> \
+    constexpr auto operator op ( \
+        fixed<Min1, Max1, Precision1, Policy, Error1> a, \
+        fixed<Min2, Max2, Precision2, Policy, Error2> b) \
+        -> decltype(tname ## _type<decltype(a), decltype(b)>::fname(a, b)) \
+    { \
+        return tname ## _type<decltype(a), decltype(b)>::fname(a, b); \
+    }
 
-	template<class A, class B>
-	constexpr typename mul_type<A, B>::type operator*(A a, B b)
-	{
-		return mul_type<A, B>::mul(a, b);
-	}
+    FIXED_OP(+, add, add)
+    FIXED_OP(-, add, sub)
+    FIXED_OP(*, mul, mul)
+    FIXED_OP(/, div, div)
 
-	template<class A>
-	constexpr typename neg_type<A>::type operator-(A a)
-	{
-		return neg_type<A>::neg(a);
-	}
+    template<
+        encoded_real Min, encoded_real Max, int Precision, class Policy, int Error
+        >
+    constexpr auto operator-(fixed<Min, Max, Precision, Policy, Error> a)
+        -> typename neg_type<decltype(a)>::type
+    {
+        return neg_type<decltype(a)>::neg(a);
+    }
 
-	template<class A, class B>
-	constexpr typename div_type<A, B>::type operator/(A a, B b)
-	{
-		return div_type<A, B>::div(a, b);
-	}
+#undef FIXED_OP
 
 	template<int _root, int_t _min, int_t _max, int precision, class policy, int error>
 	#define ROOT_TYPE root_type<_root, _min, _max, precision, policy, error>

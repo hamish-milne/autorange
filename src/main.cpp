@@ -1,5 +1,6 @@
 #include "UnitTest++.h"
 
+//#include "fixed_const_ops.hpp"
 #include "fixed_ops.hpp"
 #include "fixed_const.hpp"
 using namespace arpea;
@@ -16,11 +17,14 @@ using namespace arpea::internal;
 
 int main()
 {
-	fixed<R(1), R(255), 16, fixed_policy, 100> a(1.001);
+	fixed<R(1), R(255), 16, fixed_policy, 100> a(2);
 	integer<1, 20> b(5);
+	fixed_const<R(5)> d;
 
-	auto c = a/b;
+	auto c = b + a;
 
+    cout.precision(10);
+    cout << d.get_int(11) << endl;
     cout << a.min << ' ' << a.max << endl;
 	cout << c.min << ' ' << c.max << ' ' << c.precision << ' ' << real_t(c) << endl;
 

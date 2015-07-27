@@ -8,6 +8,11 @@
 
 namespace arpea
 {
+    namespace internal
+    {
+        struct fixed_base { };
+    }
+
 	template<
 		encoded_real Min,
 		encoded_real Max,
@@ -15,7 +20,7 @@ namespace arpea
 		class Policy = fixed_policy,
 		int Error = Policy::default_error
 		>
-	struct fixed
+	struct fixed : internal::fixed_base
 	{
 		static constexpr int precision = Precision;
         static constexpr real_t step = pow2(-(real_t)precision);

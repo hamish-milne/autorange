@@ -25,8 +25,8 @@ namespace
 		}
 	}
 
-	/*TEST(MyFirstTest)
+	TEST(MyFirstTest)
 	{
 		int_test<-100, 100>();
-	}*/
+	}
 }

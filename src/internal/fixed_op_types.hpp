@@ -12,6 +12,8 @@ namespace arpea
 		template<class A, class B>
 		struct add_type
 		{
+            static_assert(std::is_base_of<fixed_base, A>::value &&
+            std::is_base_of<fixed_base, B>::value, "Both operands must be a fixed value");
 			static_assert(std::is_same<typename A::policy, typename B::policy>::value,
 							"Policies must be the same");
 
@@ -129,6 +131,7 @@ namespace arpea
 		struct div_type
 		{
 		private:
+            static constexpr int initial_shift = inv_type<B>::shiftN / 2;
 			typedef mul_type<A, typename inv_type<B>::type> mul_result;
 
 		public:
@@ -137,8 +140,8 @@ namespace arpea
 			static constexpr type div(A a, B b)
 			{
 				return type::create(shift(shift(
-					typename type::utype(a.n), inv_type<B>::shiftN) /
-					typename type::utype(b.n), mul_result::shiftN));
+					typename type::utype(a.n), inv_type<B>::shiftN + initial_shift) /
+					typename type::utype(b.n), mul_result::shiftN - initial_shift));
 			}
 		};
 

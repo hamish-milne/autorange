@@ -1,5 +1,5 @@
-#ifndef FIXED_CONST_OP_TYPES_HPP
-#define FIXED_CONST_OP_TYPES_HPP
+#ifndef CONSTANT_OP_TYPES_HPP
+#define CONSTANT_OP_TYPES_HPP
 
 #include "../fixed_type.hpp"
 
@@ -117,25 +117,25 @@ namespace arpea
             static_assert(std::abs(B::value) > A::step, "Constant divisor is too small");
 
         private:
-            static constexpr real_t bValue = 1.0 / B::value;
+        	static constexpr real_t bValue = 1.0 / B::value;
             static constexpr int base_error = calc_mul_error<A, B>(bValue);
             static constexpr error_set e_set = A::policy::truncate_error(A::precision, base_error);
 
         public:
             typedef fixed<
-                R(max(A::max*bValue, A::min*bValue)),
                 R(min(A::max*bValue, A::min*bValue)),
+                R(max(A::max*bValue, A::min*bValue)),
                 e_set.precision,
                 typename A::policy,
                 e_set.error> type;
 
         private:
-            static constexpr typename type::utype b_n = to_int(bValue, e_set.precision);
+            static constexpr typename type::utype b_n = to_int(B::value, e_set.precision);
 
         public:
-            static constexpr type div_const(A a)
+            static constexpr type div(A a)
             {
-                return type::create(type::conv_utype(a.n) * b_n);
+                return type::create(type::conv_utype(a) / b_n);
             }
 
         };

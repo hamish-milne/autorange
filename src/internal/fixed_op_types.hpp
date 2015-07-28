@@ -12,8 +12,6 @@ namespace arpea
 		template<class A, class B>
 		struct add_type
 		{
-            static_assert(std::is_base_of<fixed_base, A>::value &&
-            std::is_base_of<fixed_base, B>::value, "Both operands must be a fixed value");
 			static_assert(std::is_same<typename A::policy, typename B::policy>::value,
 							"Policies must be the same");
 

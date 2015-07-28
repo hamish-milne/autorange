@@ -8,11 +8,6 @@
 
 namespace arpea
 {
-    namespace internal
-    {
-        struct fixed_base { };
-    }
-
 	template<
 		encoded_real Min,
 		encoded_real Max,
@@ -20,12 +15,12 @@ namespace arpea
 		class Policy = fixed_policy,
 		int Error = Policy::default_error
 		>
-	struct fixed : internal::fixed_base
+	struct fixed
 	{
 		static constexpr int precision = Precision;
         static constexpr real_t step = pow2(-(real_t)precision);
 		static constexpr real_t min = parse_R(Min);
-		static constexpr real_t max = parse_R(Max) - (step >= 1 ? 0 : step);
+		static constexpr real_t max = parse_R(Max) /*- (step >= 1 ? 0 : step)*/;
 		static constexpr int error = Error;
 		static constexpr bool is_signed = min < 0;
 		typedef Policy policy;
@@ -39,7 +34,6 @@ namespace arpea
 
 		static constexpr int calc_positive_size()
 		{
-            /// TODO: Add overload to clog2 to accommodate negative integer sizes
 			return max <= 0 ? 0 : (clog2(max, false) + (is_signed ? 1 : 0));
 		}
 
@@ -50,11 +44,16 @@ namespace arpea
         /// Integral _can_ be negative. This would happen if our min and max values were very small
 		static constexpr int integral = arpea::max(calc_negative_size(), calc_positive_size());
 		static constexpr int size = integral + precision;
-		static constexpr int_t integral_min = is_signed ? -pow2(integral) : 0;
-		static constexpr int_t integral_max = pow2(is_signed ? integral : integral+1);
+		//static constexpr int_t integral_min = is_signed ? -pow2(integral) : 0;
+		//static constexpr int_t integral_max = pow2(is_signed ? integral : integral+1);
 		static constexpr real_t real_error = step * ((real_t)error/policy::full_error);
 
-		typedef int_t utype;
+		static_assert(max > min, "Max must be greater than min");
+		static_assert(error >= 0, "Error must be positive");
+		static_assert(error <= policy::max_error, "Error must be less than policy::max_error");
+		static_assert(size > 0, "Precision is too small for value range");
+
+		typedef typename policy::template ac_int<size, is_signed>::type utype;
 		utype n;
 
 		template<class A>
@@ -87,10 +86,6 @@ namespace arpea
 
 		explicit constexpr fixed(utype _n, bool raw) : n(_n)
 		{
-			static_assert(max > min, "Max must be greater than min");
-			static_assert(error >= 0, "Error must be positive");
-			static_assert(error <= policy::max_error, "Error must be less than policy::max_error");
-			static_assert(size > 0, "Precision is too small for value range");
 		}
 
 	public:

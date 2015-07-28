@@ -1,6 +1,8 @@
 #ifndef POLICY_HPP
 #define POLICY_HPP
 
+#include "ac_int_default.hpp"
+
 namespace arpea
 {
 	/** \brief Stores precision and error values together.
@@ -29,13 +31,13 @@ namespace arpea
 		 * to give a good precision in the error value, be easy to manipulate when
 		 * specifying the error manually, and be a power of 2 for faster compile times.
 		 */
-		static const int full_error = 1024;
+		static constexpr int full_error = 1024;
 
 		/** \brief The default error value for numbers
 		 *
 		 * This will probably be `full_error / 2`
 		 */
-		static const int default_error = full_error / 2;
+		static constexpr int default_error = full_error / 2;
 
 		/** \brief The maximum error value before the number is truncated
 		 *
@@ -44,14 +46,14 @@ namespace arpea
 		 * eagerly truncate the lower bits, resulting in less accurate but better
 		 * performing code.
 		 */
-		static const int max_error = full_error * 2;
+		static constexpr int max_error = full_error * 2;
 
 		/** \brief Whether to allow casts to a lower error valued type
 		 *
 		 * This should be `false` to guarantee the accuracy of the error value,
 		 * but may need to be enabled to allow 'drop-in' replacement of existing code.
 		 */
-		static const bool allow_improper_cast = true;
+		static constexpr bool allow_improper_cast = true;
 
 		/** \brief Decreases precision for high error values
 		 *
@@ -64,6 +66,9 @@ namespace arpea
 			return error > max_error ? truncate_error(precision - 1, ceil((real_t)error/2)
 				+ full_error/2) : error_set(precision, error);
 		}
+
+		template<int Size, bool Signed>
+		using ac_int = ac_int_default<Size, Signed>;
 	};
 }
 

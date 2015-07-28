@@ -1,8 +1,8 @@
 #include "UnitTest++.h"
 
-//#include "fixed_const_ops.hpp"
+#include "fixed_const_ops.hpp"
 #include "fixed_ops.hpp"
-#include "fixed_const.hpp"
+#include "constant.hpp"
 using namespace arpea;
 
 #include <iostream>
@@ -19,9 +19,9 @@ int main()
 {
 	fixed<R(1), R(255), 16, fixed_policy, 100> a(2);
 	integer<1, 20> b(5);
-	fixed_const<R(5)> d;
+	constant<R(5)> d;
 
-	auto c = b + a;
+	auto c = b / d;
 
     cout.precision(10);
     cout << d.get_int(11) << endl;
@@ -30,7 +30,7 @@ int main()
 
     cout << parse_R(R(0.0001)) << endl;
 	//cout.precision(16);
-	//fixed_const<R(0.0000012345678901234567890)> d;
+	//constant<R(0.0000012345678901234567890)> d;
 	//cout << d.value << endl;
 	//cout << typeid(decltype(a + b)).name() << endl;
 

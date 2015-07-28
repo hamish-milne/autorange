@@ -1,41 +1,47 @@
 #ifndef FIXED_CONST_OPS_HPP
 #define FIXED_CONST_OPS_HPP
 
+#include "constant.hpp"
 #include "internal/fixed_const_op_types.hpp"
 
 using namespace arpea::internal;
 
 namespace arpea
 {
-	template<class A, class B>
-	constexpr typename const_add_type<A, B>::add_t operator+(A a, B b)
-	{
-		return const_add_type<A, B>::add(a);
+
+#define FIXED_CONST_OP(op, tname, tname2, fname)	template< \
+		encoded_real Min, encoded_real Max, int Precision, class Policy, int Error, \
+		encoded_real Value, encoded_real ErrorB \
+		> \
+	constexpr auto operator op(fixed<Min, Max, Precision, Policy, Error> a, constant<Value, ErrorB> b) \
+		-> decltype(tname ## _type<decltype(a), decltype(b)>::fname(a)) \
+	{ \
+		return tname ## _type<decltype(a), decltype(b)>::fname(a); \
+	} \
+	template< \
+		encoded_real Min, encoded_real Max, int Precision, class Policy, int Error, \
+		encoded_real Value, encoded_real ErrorB \
+		> \
+	constexpr auto operator op(constant<Value, ErrorB> a, fixed<Min, Max, Precision, Policy, Error> b) \
+		-> decltype(tname2 ## _type<decltype(b), decltype(a)>::fname(b)) \
+	{ \
+		return tname2 ## _type<decltype(b), decltype(a)>::fname(b); \
 	}
 
-	template<class A, class B>
-	constexpr typename const_add_type<A, B>::sub_t operator-(A a, B b)
+	FIXED_CONST_OP(+, const_add, const_add, add)
+	FIXED_CONST_OP(-, const_add, const_add, sub)
+	FIXED_CONST_OP(*, const_mul, const_mul, mul)
+	FIXED_CONST_OP(/, div_by_const, const_div, div)
+
+	template<encoded_real Value, encoded_real Error>
+	constexpr auto operator-(constant<Value, Error> a)
+		-> constant<R(-decltype(a)::value), Error>
 	{
-		return const_add_type<A, B>::sub(a);
+		return constant<R(-decltype(a)::value), Error>();
 	}
 
-	template<class A, class B>
-	constexpr typename const_mul_type<A, B>::type operator*(A a, B b)
-	{
-		return const_mul_type<A, B>::mul(a);
-	}
+#undef FIXED_CONST_OP
 
-	/*template<class A>
-	constexpr typename neg_type<A>::type operator-(A a)
-	{
-		return const_neg_type<A>::neg();
-	}*/
-
-	template<class A, class B>
-	constexpr typename const_div_type<A, B>::type operator/(A a, B b)
-	{
-		return const_div_type<A, B>::div(b);
-	}
 }
 
 #endif

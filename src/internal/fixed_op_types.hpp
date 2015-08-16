@@ -143,7 +143,7 @@ namespace arpea
 			}
 		};
 
-		template<int root, int_t _min, int_t _max, int precision, class policy, int error>
+		/*template<int root, int_t _min, int_t _max, int precision, class policy, int error>
 		struct root_type
 		{
 			static_assert(root > 0, "Root must be positive");
@@ -174,7 +174,7 @@ namespace arpea
 				policy,
 				e_set.error
 				> type;
-		};
+		};*/
 	}
 }
 

@@ -3,6 +3,11 @@
 
 #include <cstdint>
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wconstexpr-not-const"
+#endif
+
 namespace arpea
 {
     /** \brief A large signed integer type */

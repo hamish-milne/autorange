@@ -77,18 +77,35 @@ namespace arpea
 		return (v - int_t(v)) > 0 ? int_t(v)+1 : int_t(v);
 	}
 
-	/** \brief A `log2` function more suitable for calculating range and precision
+    /** \brief Rounds a number to its closest integer
+     *
+     * \param v  The value to round
+     * \return `v` rounded up or down
+     */
+	constexpr int_t round(real_t v)
+	{
+        return (v - int_t(v)) >= 0.5 ? int_t(v)+1 : int_t(v);
+	}
+
+	/** \brief Calculates the base-2 logarithm, rounded upwards
 	 *
 	 * \param v  The input value
-	 * \param round_out  If true, round negative values to be more negative
-	 * \return `log2(v)` rounded appropriately
+	 * \return `log2(v)` rounded up
 	 */
-	constexpr int_t clog2(real_t v, bool round_out = true)
+	constexpr int_t clog2(real_t v)
 	{
-		return round_out ? (
-            (v < 1 ? -1 : 1) * ceil(std::log2(v < 1 ? (real_t)1/v : v))
+		return v <= 0 ? (
+            throw std::logic_error("clog2: Value must be positive")
         ) : (
-            ceil(std::log2(v))
+            v <= 0.5 ? (
+                clog2(v*2)-1
+            ) : (
+                v <= 1 ? (
+                    0
+                ) : (
+                    clog2(v/2)+1
+                )
+            )
         );
 	}
 
@@ -96,10 +113,17 @@ namespace arpea
 	 *
 	 * \param e  The input value
 	 */
-	template<typename T>
-	constexpr T pow2(T e)
+	constexpr real_t pow2(int_t e)
 	{
-		return std::pow((T)2, e);
+		return e == 0 ? (
+            1
+        ) : (
+            e < 0 ? (
+                pow2(e+1)/2
+            ) : (
+                pow2(e-1)*2
+            )
+        );
 	}
 
 	/** \brief Left shift that allows negative values
@@ -114,6 +138,11 @@ namespace arpea
 		return s < 0 ? v >> -s : v << s;
 	}
 
+    /** \brief Calculates the absolute value of its input
+     *
+     * \param v  The value
+     * \return `v` if it is positive, or `-v` if it is negative
+     */
 	template<typename T>
 	constexpr T abs(T v)
 	{
@@ -127,7 +156,7 @@ namespace arpea
 	 */
 	constexpr int P(real_t e)
 	{
-		return -clog2(abs(e));
+		return clog2(1.0/abs(e));
 	}
 
 	static constexpr bool check_exp(int exp)
@@ -140,20 +169,33 @@ namespace arpea
 		return clog2(abs(real));
 	}
 
+    /** \brief Shifts an integer to the left.
+     *  This is a clang workaround, since it doesn't allow negative values to be
+     *  shifted left.
+     *
+     * \param value  The value to shift
+     * \param shift  The number of places to shift it by
+     * \return `value << shift`
+     */
+    constexpr int_t shift_left(int_t value, int_t shift)
+    {
+        return value >= 0 ? (value << shift) :
+            uint_t(value) << shift;
+    }
+
 	typedef int8_t exp_t;
 
     typedef uintmax_t encoded_real;
 
-
-    constexpr int exponent_bits = CHAR_BIT * sizeof(exp_t) + 1;
-    constexpr int mantissa_bits = CHAR_BIT * sizeof(encoded_real) - exponent_bits;
+    constexpr int exponent_bits = (CHAR_BIT * sizeof(exp_t)) + 1;
+    constexpr int mantissa_bits = (CHAR_BIT * sizeof(encoded_real)) - exponent_bits;
     constexpr encoded_real mantissa_mask = ~encoded_real(0) >> exponent_bits;
     constexpr encoded_real sign_bit = encoded_real(1) << (CHAR_BIT * sizeof(encoded_real) - 1);
 
-    static constexpr encoded_real R_abs(real_t real)
+    constexpr encoded_real R_abs(real_t real)
     {
         return real == 0 ? 0 : (check_exp(calc_exp(real)) ? (
-                ((calc_exp(real) << mantissa_bits) & ~sign_bit)
+                (shift_left(calc_exp(real), mantissa_bits) & ~sign_bit)
                     |
                 ((encoded_real)ceil(real * pow2(real_t(mantissa_bits - calc_exp(real)))) >> exponent_bits)
             ) : (
@@ -167,7 +209,7 @@ namespace arpea
 	 * data is formatted with the exponent first, allowing positive integers to
 	 * be encoded normally.
 	 */
-	static constexpr encoded_real R(real_t real)
+	constexpr encoded_real R(real_t real)
 	{
 		return real < 0 ? (R_abs(-real) | sign_bit) : R_abs(real);
 	}
@@ -175,7 +217,7 @@ namespace arpea
 	/** \brief Converts the output of `R` back to a real number
 	 *
 	 */
-	static constexpr real_t parse_R(encoded_real data)
+	constexpr real_t parse_R(encoded_real data)
 	{
 		return
             ((data & sign_bit) ? -1 : 1) *
@@ -183,9 +225,9 @@ namespace arpea
 			pow2((real_t)(exp_t)((data & ~sign_bit) >> mantissa_bits) - mantissa_bits);
 	}
 
-    static constexpr int_t to_int(real_t value, int precision)
+    constexpr int_t to_int(real_t value, int precision)
     {
-        return std::round(value * std::pow(2, precision));
+        return round(value * pow2(precision));
     }
 
 	/**

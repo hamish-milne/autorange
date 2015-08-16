@@ -7,7 +7,7 @@
 \numberwithin{equation}{section}
 \numberwithin{equation}{subsection}
 \author{Hamish Milne}
-\title{AutoRange: A Methodology for the Typical Unification of Access Points and Redundancy}
+\title{ARPEA: Automatic Range, Precision and Error Analysis}
 \begin{document}
 	
 	\maketitle
@@ -32,6 +32,19 @@
 		\item The integral and error components can be separated out, if they are additive.
 		\item The error term cannot contain $n_i$ (because we want to calculate it at compile time).
 	\end{itemize}
+	
+	\section{Error truncation}
+	
+	When dealing with scientific numbers, there is no strict relation between accuracy and precision. A value of $0.001\pm 1000000$ is just as valid as $1000000\pm 0.001$; however, in all practical cases, the precision given in the first case becomes irrelevant with such a large margin of error. To decrease resource usage and improve performance, we can choose to truncate the precision of each value depending on its error coefficient.
+	
+	Since we have many different possible applications and use cases, the manner in which this truncation happens is configurable by the user, including allowing none whatsoever. By default, the following method is used:
+	
+	\begin{equation}
+	e = \begin{cases}
+	(e+f)/2 & \text{if } e>2f\\
+	e & \text{otherwise}
+	\end{cases}
+	\end{equation}
 	
 	\section{Basic arithmetic}
 	

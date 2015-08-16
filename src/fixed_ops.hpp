@@ -37,13 +37,13 @@ namespace arpea
 
 #undef FIXED_OP
 
-	template<int _root, int_t _min, int_t _max, int precision, class policy, int error>
+	/*template<int _root, int_t _min, int_t _max, int precision, class policy, int error>
 	#define ROOT_TYPE root_type<_root, _min, _max, precision, policy, error>
 	constexpr typename ROOT_TYPE::type
 	root(fixed<_min, _max, precision, policy, error> a)
 	{
-		return ROOT_TYPE::type::create(policy::root<_root>(a.n) /* *ROOT_TYPE::m_root */);
-	}
+		return ROOT_TYPE::type::create(policy::root<_root>(a.n) *ROOT_TYPE::m_root);
+	}*/
 
 }
 

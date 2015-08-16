@@ -29,12 +29,12 @@ namespace arpea
 
 		static constexpr int calc_negative_size()
 		{
-			return min >= 0 ? 0 : (clog2(-min, false) + 1);
+			return min >= 0 ? 0 : (clog2(-min) + 1);
 		}
 
 		static constexpr int calc_positive_size()
 		{
-			return max <= 0 ? 0 : (clog2(max, false) + (is_signed ? 1 : 0));
+			return max <= 0 ? 0 : (clog2(max) + (is_signed ? 1 : 0));
 		}
 
 		static constexpr int_t pshift = pow2((int_t)precision);
@@ -62,9 +62,15 @@ namespace arpea
             return shift(utype(a.n), precision - A::precision);
 		}
 
+        /** clang bug workarounds... */
+		const real_t _step = step;
+		const real_t _min = min;
+		const real_t _max = max;
+		const real_t _real_error = real_error;
+
 	private:
 
-		static constexpr utype sign_extend_const = (utype)-1 << (size - 1);
+		static constexpr utype sign_extend_const = shift_left((utype)-1, size - 1);
 
 		static constexpr utype sign_extend(utype n)
 		{
@@ -98,7 +104,7 @@ namespace arpea
 		{
 		}
 
-		explicit constexpr operator real_t()
+        explicit constexpr operator real_t()
 		{
 			return step * n;
 		}
@@ -107,7 +113,6 @@ namespace arpea
 		{
 			return fixed(n, false);
 		}
-
 	};
 
 	template<int_t Min, int_t Max, class Policy = fixed_policy>

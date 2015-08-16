@@ -50,7 +50,7 @@ namespace arpea
         constexpr real_t calc_mul_error(real_t bValue)
         {
             return ceil(
-                (B::error * max(std::abs(A::min), A::max)) +
+                (B::error * max(abs(A::min), A::max)) +
                 (A::error * bValue) +
                 (A::error * B::error / A::policy::full_error));
         }
@@ -88,7 +88,7 @@ namespace arpea
             static_assert(A::min > 0 || A::max < 0, "Cannot divide by zero");
 
         private:
-            static constexpr int base_precision = max(A::precision, (int)clog2(max(std::abs(A::min), A::max)));
+            static constexpr int base_precision = max(A::precision, (int)clog2(max(abs(A::min), A::max)));
             static constexpr error_set e_set = A::policy::truncate_error(base_precision, A::error + B::error);
 
         public:
@@ -114,7 +114,7 @@ namespace arpea
         template<class A, class B>
         struct div_by_const_type
         {
-            static_assert(std::abs(B::value) > A::step, "Constant divisor is too small");
+            static_assert(abs(B::value) > A::step, "Constant divisor is too small");
 
         private:
         	static constexpr real_t bValue = 1.0 / B::value;

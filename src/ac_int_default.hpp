@@ -56,6 +56,12 @@ namespace arpea
 		typedef typename std::conditional<(Size > sizeof(uintmax_t)*CHAR_BIT),
 			size_error_t<false>, type_max_64>::type type;
 	};
+
+	template<int Size>
+	struct ac_int_test
+	{
+        intmax_t a:Size;
+	};
 }
 
 #endif

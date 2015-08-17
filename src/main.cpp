@@ -2,7 +2,7 @@
 
 #include "fixed_const_ops.hpp"
 #include "fixed_ops.hpp"
-#include "constant.hpp"
+#include "const_ops.hpp"
 using namespace arpea;
 
 #include <iostream>
@@ -22,7 +22,7 @@ int main()
     constant<R(0.5)>
         scale;
 
-    auto b0r = scale * (a0r + a1r + a2r + a3r);
+    /*auto b0r = scale * (a0r + a1r + a2r + a3r);
     auto b0i = scale * (a0i + a1i + a2i + a3i);
 
     auto b1r = scale * (a0r + a1i - a2r - a3i);
@@ -32,7 +32,7 @@ int main()
     auto b2i = scale * (a0i - a1i + a2i - a3i);
 
     auto b3r = scale * (a0r - a1i - a2r + a3i);
-    auto b3i = scale * (a0i + a1r - a2i - a3r);
+    auto b3i = scale * (a0i + a1r - a2i - a3r);*/
 
 	fixed<R(1), R(255), 16, fixed_policy, 100> a(2);
 	integer<1, 20> b(5);
@@ -47,7 +47,7 @@ int main()
 	cout << c._min << ' ' << c._max << ' ' << c.precision << ' ' << real_t(c) << endl;
 
     cout << parse_R(R(0.0001)) << endl;
-    cout << typeid(ac_int_default<8, false>::type).name() << endl;
+    cout << typeid(ac_int_default<9, false>::type).name() << endl;
 	//cout.precision(16);
 	//constant<R(0.0000012345678901234567890)> d;
 	//cout << d.value << endl;

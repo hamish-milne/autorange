@@ -12,6 +12,10 @@ namespace arpea
 
 		static constexpr real_t error = parse_R(Error);
 
+		/// Workaround...
+		const real_t _value = value;
+		const real_t _error = error;
+
 		static constexpr int_t get_int(int precision)
 		{
 			return to_int(value, precision);

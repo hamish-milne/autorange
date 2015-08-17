@@ -44,6 +44,7 @@
 		</Linker>
 		<Unit filename="src/ac_int_default.hpp" />
 		<Unit filename="src/arpea_core.hpp" />
+		<Unit filename="src/const_ops.hpp" />
 		<Unit filename="src/constant.hpp" />
 		<Unit filename="src/fixed_const_ops.hpp" />
 		<Unit filename="src/fixed_ops.hpp" />
@@ -56,6 +57,7 @@
 		<Unit filename="src/mainpage.dox" />
 		<Unit filename="src/policy.hpp" />
 		<Unit filename="src/test/Basic.cpp" />
+		<Unit filename="src/test/Constant.cpp" />
 		<Unit filename="src/test/Helpers.cpp" />
 		<Extensions>
 			<code_completion>

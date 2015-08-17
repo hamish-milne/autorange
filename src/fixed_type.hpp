@@ -83,7 +83,7 @@ namespace arpea
 				throw std::logic_error("fixed: Argument out of range")
 			) : (
 				is_signed ? (
-					sign_extend(std::round(d * pshift))
+					sign_extend(round(d * pshift))
 				) : (
 					(utype)(d * pshift)
 				)

@@ -2,7 +2,6 @@
 #define HELPERS_HPP
 
 #include <cstdint>
-#include <cmath>
 #include <climits>
 #include <stdexcept>
 
@@ -164,11 +163,6 @@ namespace arpea
 		return (exp >= -0x80 && exp < 0x80);
 	}
 
-	static constexpr int_t calc_exp(real_t real)
-	{
-		return clog2(abs(real));
-	}
-
     /** \brief Shifts an integer to the left.
      *  This is a clang workaround, since it doesn't allow negative values to be
      *  shifted left.
@@ -192,12 +186,14 @@ namespace arpea
     constexpr encoded_real mantissa_mask = ~encoded_real(0) >> exponent_bits;
     constexpr encoded_real sign_bit = encoded_real(1) << (CHAR_BIT * sizeof(encoded_real) - 1);
 
+    constexpr real_t R_epsilon = pow2(-mantissa_bits);
+
     constexpr encoded_real R_abs(real_t real)
     {
-        return real == 0 ? 0 : (check_exp(calc_exp(real)) ? (
-                (shift_left(calc_exp(real), mantissa_bits) & ~sign_bit)
+        return real == 0 ? 0 : (check_exp(clog2(real)) ? (
+                (shift_left(clog2(real), mantissa_bits) & ~sign_bit)
                     |
-                ((encoded_real)ceil(real * pow2(real_t(mantissa_bits - calc_exp(real)))) >> exponent_bits)
+                (mantissa_mask & ((encoded_real)ceil(real * pow2(mantissa_bits - clog2(real))) >> 1))
             ) : (
                 throw std::logic_error("R: Floating point under/overflow")
             ));
@@ -205,9 +201,7 @@ namespace arpea
 
 	/** \brief Converts a real number into data that can be used by templates
 	 *
-	 * This function packs an exponent and mantissa into a single `uint_t`. The
-	 * data is formatted with the exponent first, allowing positive integers to
-	 * be encoded normally.
+	 * This function packs an exponent and mantissa into a single `uint_t`
 	 */
 	constexpr encoded_real R(real_t real)
 	{
@@ -221,7 +215,7 @@ namespace arpea
 	{
 		return
             ((data & sign_bit) ? -1 : 1) *
-            (int_t)((data & mantissa_mask) << exponent_bits) *
+            (int_t)((data & mantissa_mask) << 1) *
 			pow2((real_t)(exp_t)((data & ~sign_bit) >> mantissa_bits) - mantissa_bits);
 	}
 

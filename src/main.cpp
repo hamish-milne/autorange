@@ -15,6 +15,21 @@ using std::endl;
 
 using namespace arpea::internal;
 
+union my_union
+{
+	real_t real;
+	encoded_real enc;
+
+	constexpr my_union(real_t r) : real(r)
+	{
+	}
+};
+
+static constexpr encoded_real test(real_t r)
+{
+	return my_union(r).enc;
+}
+
 int main()
 {
     fixed<R(-5),R(10),P(0.0001)>
@@ -34,7 +49,7 @@ int main()
     auto b3r = scale * (a0r - a1i - a2r + a3i);
     auto b3i = scale * (a0i + a1r - a2i - a3r);*/
 
-	fixed<R(1), R(255), 16, fixed_policy, 100> a(2);
+	fixed<1, 255, 16, fixed_policy, 100> a(2);
 	integer<1, 20> b(5);
 	constant<R(-2)> d;
 

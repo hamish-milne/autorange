@@ -130,14 +130,13 @@ namespace arpea
                 e_set.error> type;
 
         private:
-            static constexpr typename type::utype b_n = to_int(B::value, e_set.precision);
+            static constexpr typename type::utype b_n = to_fixed(B::value, e_set.precision);
 
         public:
             static constexpr type div(A a)
             {
                 return type::create(type::conv_utype(a) / b_n);
             }
-
         };
     }
 }

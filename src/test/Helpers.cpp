@@ -36,6 +36,17 @@ namespace
 		CHECK_EQUAL(-2, clog2(0.2));
 	}
 
+	TEST(Flog2)
+	{
+		CHECK_EQUAL(0, flog2(1));
+		CHECK_EQUAL(0, flog2(1.01));
+		CHECK_EQUAL(8, flog2(256));
+		CHECK_EQUAL(-8, flog2((real_t)1.0/(real_t)256.0));
+		CHECK_EQUAL(-9, flog2((real_t)1.0/(real_t)257.0));
+		CHECK_EQUAL(-1, flog2(0.51));
+		CHECK_EQUAL(-3, flog2(0.2));
+	}
+
 	TEST(Abs)
 	{
         CHECK_EQUAL(0, abs(0));

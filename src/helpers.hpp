@@ -87,6 +87,7 @@ namespace arpea
 	}
 
 	/** \brief Calculates the base-2 logarithm, rounded upwards
+	 * This is suitable for range calculations.
 	 *
 	 * \param v  The input value
 	 * \return `log2(v)` rounded up
@@ -106,6 +107,17 @@ namespace arpea
                 )
             )
         );
+	}
+
+	/** \brief Calculates the base-2 logarithm, rounded upwards
+	 * This is suitable for precision calculations.
+	 *
+	 * \param v  The input value
+	 * \return `log2(v)` rounded up
+	 */
+	constexpr int_t flog2(real_t v)
+	{
+		return -clog2(1/v);
 	}
 
 	/** \brief Calculates 2 to the input power
@@ -158,11 +170,6 @@ namespace arpea
 		return clog2(1.0/abs(e));
 	}
 
-	static constexpr bool check_exp(int exp)
-	{
-		return (exp >= -0x80 && exp < 0x80);
-	}
-
     /** \brief Shifts an integer to the left.
      *  This is a clang workaround, since it doesn't allow negative values to be
      *  shifted left.
@@ -181,31 +188,38 @@ namespace arpea
 
     typedef uintmax_t encoded_real;
 
-    constexpr int exponent_bits = (CHAR_BIT * sizeof(exp_t)) + 1;
+    constexpr int exponent_bits = (CHAR_BIT * sizeof(exp_t)) + 2;
     constexpr int mantissa_bits = (CHAR_BIT * sizeof(encoded_real)) - exponent_bits;
     constexpr encoded_real mantissa_mask = ~encoded_real(0) >> exponent_bits;
-    constexpr encoded_real sign_bit = encoded_real(1) << (CHAR_BIT * sizeof(encoded_real) - 1);
+    constexpr encoded_real fp_bit = encoded_real(1) << (CHAR_BIT * sizeof(encoded_real) - 1);
+	constexpr encoded_real sign_bit = encoded_real(1) << (CHAR_BIT * sizeof(encoded_real) - 2);
 
     constexpr real_t R_epsilon = pow2(-mantissa_bits);
 
-    constexpr encoded_real R_abs(real_t real)
+    constexpr encoded_real R_abs(real_t real, int exp)
     {
-        return real == 0 ? 0 : (check_exp(clog2(real)) ? (
-                (shift_left(clog2(real), mantissa_bits) & ~sign_bit)
-                    |
-                (mantissa_mask & ((encoded_real)ceil(real * pow2(mantissa_bits - clog2(real))) >> 1))
+        return (exp >= -0x80 && exp < 0x80) ? (
+				fp_bit |
+                (shift_left(exp, mantissa_bits) & ~sign_bit) |
+                (mantissa_mask & (encoded_real)ceil(real * pow2(mantissa_bits - exp)))
             ) : (
                 throw std::logic_error("R: Floating point under/overflow")
-            ));
+            );
     }
 
 	/** \brief Converts a real number into data that can be used by templates
 	 *
-	 * This function packs an exponent and mantissa into a single `uint_t`
+	 * This function packs an exponent and mantissa into an integral type
 	 */
 	constexpr encoded_real R(real_t real)
 	{
-		return real < 0 ? (R_abs(-real) | sign_bit) : R_abs(real);
+		return real == 0 ? 0 : (
+			real < 0 ? (
+				R_abs(-real, flog2(-real)) | sign_bit
+			) : (
+				R_abs(real, flog2(real))
+			)
+		);
 	}
 
 	/** \brief Converts the output of `R` back to a real number
@@ -213,13 +227,18 @@ namespace arpea
 	 */
 	constexpr real_t parse_R(encoded_real data)
 	{
-		return
+		return !(data & fp_bit) ? data : (
             ((data & sign_bit) ? -1 : 1) *
-            (int_t)((data & mantissa_mask) << 1) *
-			pow2((real_t)(exp_t)((data & ~sign_bit) >> mantissa_bits) - mantissa_bits);
+            (int_t)((data & mantissa_mask) + ((encoded_real)1 << mantissa_bits)) *
+			pow2((real_t)(exp_t)((data & ~sign_bit) >> mantissa_bits) - mantissa_bits)
+		);
 	}
 
-    constexpr int_t to_int(real_t value, int precision)
+	/** \brief Converts a real value into a fixed-point representation
+	 *
+	 * \param precision  The number of fractional bits
+	 */
+    constexpr int_t to_fixed(real_t value, int precision)
     {
         return round(value * pow2(precision));
     }

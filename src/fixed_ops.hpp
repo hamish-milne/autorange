@@ -4,8 +4,6 @@
 #include "internal/fixed_op_types.hpp"
 #include <type_traits>
 
-using namespace arpea::internal;
-
 namespace arpea
 {
 
@@ -16,9 +14,9 @@ namespace arpea
     constexpr auto operator op ( \
         fixed<Min1, Max1, Precision1, Policy, Error1> a, \
         fixed<Min2, Max2, Precision2, Policy, Error2> b) \
-        -> decltype(tname ## _type<decltype(a), decltype(b)>::fname(a, b)) \
+        -> decltype(internal::tname ## _type<decltype(a), decltype(b)>::fname(a, b)) \
     { \
-        return tname ## _type<decltype(a), decltype(b)>::fname(a, b); \
+        return internal::tname ## _type<decltype(a), decltype(b)>::fname(a, b); \
     }
 
     FIXED_OP(+, add, add)
@@ -30,20 +28,12 @@ namespace arpea
         encoded_real Min, encoded_real Max, int Precision, class Policy, int Error
         >
     constexpr auto operator-(fixed<Min, Max, Precision, Policy, Error> a)
-        -> typename neg_type<decltype(a)>::type
+        -> typename internal::neg_type<decltype(a)>::type
     {
-        return neg_type<decltype(a)>::neg(a);
+        return internal::neg_type<decltype(a)>::neg(a);
     }
 
 #undef FIXED_OP
-
-	/*template<int _root, int_t _min, int_t _max, int precision, class policy, int error>
-	#define ROOT_TYPE root_type<_root, _min, _max, precision, policy, error>
-	constexpr typename ROOT_TYPE::type
-	root(fixed<_min, _max, precision, policy, error> a)
-	{
-		return ROOT_TYPE::type::create(policy::root<_root>(a.n) *ROOT_TYPE::m_root);
-	}*/
 
 }
 

@@ -5,6 +5,11 @@
 
 namespace arpea
 {
+	/**
+	 * \addtogroup Policy
+	 * @{
+	 */
+
 	/** \brief Stores precision and error values together.
 	 *
 	 * This is used to make the error truncation function neater
@@ -23,8 +28,9 @@ namespace arpea
 	/** \brief The default policy class for the `fixed` type
 	 *
 	 */
-	struct fixed_policy
+	class fixed_policy
 	{
+	public:
 		/** \brief A full LSB's worth of error.
 		 *
 		 * This number can be anything, but it should ideally: be reasonably large
@@ -67,9 +73,15 @@ namespace arpea
 				+ full_error/2) : error_set(precision, error);
 		}
 
+		/** \brief The exact-width integer type to use
+		 */
 		template<int Size, bool Signed>
 		using ac_int = ac_int_default<Size, Signed>;
 	};
+
+	/**
+	 * @}
+	 */
 }
 
 #endif

@@ -5,6 +5,11 @@
 
 namespace arpea
 {
+	/**
+	 * \addtogroup Constants
+	 * @{
+	 */
+
 	/** \brief A constant value. Forces compile-time constant optimization.
 	 *  Constant values don't take representation into account, and can be
 	 *  assigned to any value unless their error is too high.
@@ -34,6 +39,9 @@ namespace arpea
 		}
 	};
 
+	/**
+	 * @}
+	 */
 }
 
 #endif

@@ -4,8 +4,6 @@
 #include "constant.hpp"
 #include "internal/fixed_const_op_types.hpp"
 
-using namespace arpea::internal;
-
 namespace arpea
 {
 
@@ -14,18 +12,18 @@ namespace arpea
 		encoded_real Value, encoded_real ErrorB \
 		> \
 	constexpr auto operator op(fixed<Min, Max, Precision, Policy, Error> a, constant<Value, ErrorB> b) \
-		-> decltype(tname ## _type<decltype(a), decltype(b)>::fname(a)) \
+		-> decltype(internal::tname ## _type<decltype(a), decltype(b)>::fname(a)) \
 	{ \
-		return tname ## _type<decltype(a), decltype(b)>::fname(a); \
+		return internal::tname ## _type<decltype(a), decltype(b)>::fname(a); \
 	} \
 	template< \
 		encoded_real Min, encoded_real Max, int Precision, class Policy, int Error, \
 		encoded_real Value, encoded_real ErrorB \
 		> \
 	constexpr auto operator op(constant<Value, ErrorB> a, fixed<Min, Max, Precision, Policy, Error> b) \
-		-> decltype(tname2 ## _type<decltype(b), decltype(a)>::fname(b)) \
+		-> decltype(internal::tname2 ## _type<decltype(b), decltype(a)>::fname(b)) \
 	{ \
-		return tname2 ## _type<decltype(b), decltype(a)>::fname(b); \
+		return internal::tname2 ## _type<decltype(b), decltype(a)>::fname(b); \
 	}
 
 	FIXED_CONST_OP(+, const_add, const_add, add)

@@ -178,34 +178,45 @@ namespace arpea
      * \param shift  The number of places to shift it by
      * \return `value << shift`
      */
-    constexpr int_t shift_left(int_t value, int_t shift)
+	template<class T>
+    constexpr T shift_left(T value, int_t shift)
     {
         return value >= 0 ? (value << shift) :
             uint_t(value) << shift;
     }
 
-	typedef int8_t exp_t;
-
+	/** \brief Denotes a parameter that should be the return value of `R()`
+	 *
+	 * To avoid errors, positive integers can be used here as well.
+	 * However, raw negative integers won't work, and will cause obscure errors.
+	 */
     typedef uintmax_t encoded_real;
 
-    constexpr int exponent_bits = (CHAR_BIT * sizeof(exp_t)) + 2;
-    constexpr int mantissa_bits = (CHAR_BIT * sizeof(encoded_real)) - exponent_bits;
-    constexpr encoded_real mantissa_mask = ~encoded_real(0) >> exponent_bits;
-    constexpr encoded_real fp_bit = encoded_real(1) << (CHAR_BIT * sizeof(encoded_real) - 1);
-	constexpr encoded_real sign_bit = encoded_real(1) << (CHAR_BIT * sizeof(encoded_real) - 2);
+	namespace internal
+	{
+		template<class A, class B>
+		static constexpr typename A::utype conv_utype(B b)
+		{
+            return shift(typename A::utype(b.n), A::precision - B::precision);
+		}
 
-    constexpr real_t R_epsilon = pow2(-mantissa_bits);
+		constexpr int exponent_bits = (CHAR_BIT * sizeof(int8_t)) + 2;
+		constexpr int mantissa_bits = (CHAR_BIT * sizeof(encoded_real)) - exponent_bits;
+		constexpr encoded_real mantissa_mask = ~encoded_real(0) >> exponent_bits;
+		constexpr encoded_real fp_bit = encoded_real(1) << (CHAR_BIT * sizeof(encoded_real) - 1);
+		constexpr encoded_real sign_bit = encoded_real(1) << (CHAR_BIT * sizeof(encoded_real) - 2);
 
-    constexpr encoded_real R_abs(real_t real, int exp)
-    {
-        return (exp >= -0x80 && exp < 0x80) ? (
-				fp_bit |
-                (shift_left(exp, mantissa_bits) & ~sign_bit) |
-                (mantissa_mask & (encoded_real)ceil(real * pow2(mantissa_bits - exp)))
-            ) : (
-                throw std::logic_error("R: Floating point under/overflow")
-            );
-    }
+		constexpr encoded_real R_abs(real_t real, int_t exp)
+		{
+			return (exp >= -0x80 && exp < 0x80) ? (
+					fp_bit |
+					(shift_left(exp, mantissa_bits) & ~sign_bit) |
+					(mantissa_mask & (encoded_real)ceil(real * pow2(mantissa_bits - exp)))
+				) : (
+					throw std::logic_error("R: Floating point under/overflow")
+				);
+		}
+	}
 
 	/** \brief Converts a real number into data that can be used by templates
 	 *
@@ -213,6 +224,7 @@ namespace arpea
 	 */
 	constexpr encoded_real R(real_t real)
 	{
+		using namespace internal;
 		return real == 0 ? 0 : (
 			real < 0 ? (
 				R_abs(-real, flog2(-real)) | sign_bit
@@ -222,26 +234,21 @@ namespace arpea
 		);
 	}
 
-	/** \brief Converts the output of `R` back to a real number
-	 *
+	/** \brief Converts the output of `R()` back to a real number
 	 */
 	constexpr real_t parse_R(encoded_real data)
 	{
+		using namespace internal;
 		return !(data & fp_bit) ? data : (
             ((data & sign_bit) ? -1 : 1) *
             (int_t)((data & mantissa_mask) + ((encoded_real)1 << mantissa_bits)) *
-			pow2((real_t)(exp_t)((data & ~sign_bit) >> mantissa_bits) - mantissa_bits)
+			pow2((real_t)(int8_t)((data & ~sign_bit) >> mantissa_bits) - mantissa_bits)
 		);
 	}
 
-	/** \brief Converts a real value into a fixed-point representation
-	 *
-	 * \param precision  The number of fractional bits
+	/** \brief The minimum difference in values returned by `R()`
 	 */
-    constexpr int_t to_fixed(real_t value, int precision)
-    {
-        return round(value * pow2(precision));
-    }
+	constexpr real_t R_epsilon = pow2(-internal::mantissa_bits);
 
 	/**
 	 * @}

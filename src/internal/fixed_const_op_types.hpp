@@ -36,12 +36,12 @@ namespace arpea
         public:
             static constexpr add_t add(A a)
             {
-                return add_t::create(add_t::conv_utype(a) + b_add);
+                return add_t::create(conv_utype<add_t>(a) + b_add);
             }
 
             static constexpr sub_t sub(A a)
             {
-                return sub_t::create(sub_t::conv_utype(a) - b_sub);
+                return sub_t::create(conv_utype<sub_t>(a) - b_sub);
             }
 
         };
@@ -60,7 +60,8 @@ namespace arpea
         {
         private:
             static constexpr int base_error = calc_mul_error<A, B>(B::value);
-            static constexpr error_set e_set = A::policy::truncate_error(A::precision, base_error);
+            static constexpr error_set e_set =
+				A::policy::truncate_error(A::precision, base_error);
 
         public:
             typedef fixed<
@@ -88,8 +89,11 @@ namespace arpea
             static_assert(A::min > 0 || A::max < 0, "Cannot divide by zero");
 
         private:
-            static constexpr int base_precision = max(A::precision, (int)clog2(max(abs(A::min), A::max)));
-            static constexpr error_set e_set = A::policy::truncate_error(base_precision, A::error + B::error);
+        	/// Expand the precision if we're dividing by a large number..
+            static constexpr int base_precision = max(A::precision,
+				(int)clog2(max(abs(A::min), A::max)));
+            static constexpr error_set e_set =
+				A::policy::truncate_error(base_precision, A::error + B::error);
 
         public:
             typedef fixed<
@@ -102,7 +106,8 @@ namespace arpea
         private:
             /// TODO: static asserts re. shifts?
             static constexpr int initial_shift = e_set.precision / 2;
-            static constexpr typename type::utype b_n = B::get_int(A::precision + initial_shift);
+            static constexpr typename type::utype b_n =
+				B::get_int(A::precision + initial_shift);
 
         public:
             static constexpr type div(A a)
@@ -119,7 +124,8 @@ namespace arpea
         private:
         	static constexpr real_t bValue = 1.0 / B::value;
             static constexpr int base_error = calc_mul_error<A, B>(bValue);
-            static constexpr error_set e_set = A::policy::truncate_error(A::precision, base_error);
+            static constexpr error_set e_set =
+				A::policy::truncate_error(A::precision, base_error);
 
         public:
             typedef fixed<
@@ -130,12 +136,13 @@ namespace arpea
                 e_set.error> type;
 
         private:
-            static constexpr typename type::utype b_n = to_fixed(B::value, e_set.precision);
+            static constexpr typename type::utype b_n =
+				round(B::value * pow2(e_set.precision));
 
         public:
             static constexpr type div(A a)
             {
-                return type::create(type::conv_utype(a) / b_n);
+                return type::create(conv_utype<type>(a) / b_n);
             }
         };
     }

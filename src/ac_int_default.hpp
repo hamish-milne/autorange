@@ -8,6 +8,11 @@
 
 namespace arpea
 {
+	/**
+	 * \addtogroup Core
+	 * @{
+	 */
+
     /** \brief Used to force stop compilation when a requested integer
      *         is too large.
      */
@@ -30,13 +35,13 @@ namespace arpea
 		template<class T1, class T2>
 		using selector = std::conditional<(Size > sizeof(T2)*CHAR_BIT), T1, T2>;
 
-		typedef typename selector<int8_t, int16_t>::type type_16_8;
-		typedef typename selector<type_16_8, int32_t>::type type_32_16;
-		typedef typename selector<type_32_16, int64_t>::type type_64_32;
-		typedef typename selector<type_64_32, intmax_t>::type type_max_64;
+		typedef typename selector<size_error_t<false>, intmax_t>::type type_error_max;
+		typedef typename selector<type_error_max, int64_t>::type type_max_64;
+		typedef typename selector<type_max_64, int32_t>::type type_64_32;
+		typedef typename selector<type_64_32, int16_t>::type type_32_16;
+
 	public:
-		typedef typename std::conditional<(Size > sizeof(intmax_t)*CHAR_BIT),
-			size_error_t<false>, type_max_64>::type type;
+		typedef typename selector<type_32_16, int8_t>::type type;
 	};
 
     /** \brief Unsigned specialisation of `ac_int_default`
@@ -48,20 +53,18 @@ namespace arpea
 		template<class T1, class T2>
 		using selector = std::conditional<(Size > sizeof(T2)*CHAR_BIT), T1, T2>;
 
-		typedef typename selector<uint8_t, uint16_t>::type type_16_8;
-		typedef typename selector<type_16_8, uint32_t>::type type_32_16;
-		typedef typename selector<type_32_16, uint64_t>::type type_64_32;
-		typedef typename selector<type_64_32, uintmax_t>::type type_max_64;
+		typedef typename selector<size_error_t<false>, uintmax_t>::type type_error_max;
+		typedef typename selector<type_error_max, uint64_t>::type type_max_64;
+		typedef typename selector<type_max_64, uint32_t>::type type_64_32;
+		typedef typename selector<type_64_32, uint16_t>::type type_32_16;
+
 	public:
-		typedef typename std::conditional<(Size > sizeof(uintmax_t)*CHAR_BIT),
-			size_error_t<false>, type_max_64>::type type;
+		typedef typename selector<type_32_16, uint8_t>::type type;
 	};
 
-	template<int Size>
-	struct ac_int_test
-	{
-        intmax_t a:Size;
-	};
+	/**
+	 * @}
+	 */
 }
 
 #endif

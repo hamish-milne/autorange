@@ -1,7 +1,7 @@
 /**
 \mainpage Introduction
 
-<TBC> is an automatic ranging and error analysis library for HDL.
+ARPEA: Automatic Range, Precision and Error Analysis for HLS.
 
 TODO: Further documentation with simple examples, benefits and limitations.
 

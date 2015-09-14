@@ -46,12 +46,12 @@ namespace arpea
 
 			static add_t add(A a, B b)
 			{
-				return add_t::create(add_t::conv_utype(a) + add_t::conv_utype(b));
+				return add_t::create(conv_utype<add_t>(a) + conv_utype<add_t>(b));
 			}
 
 			static sub_t sub(A a, B b)
 			{
-				return sub_t::create(add_t::conv_utype(a) - add_t::conv_utype(b));
+				return sub_t::create(conv_utype<add_t>(a) - conv_utype<add_t>(b));
 			}
 		};
 
@@ -142,39 +142,6 @@ namespace arpea
 					typename type::utype(b.n), mul_result::shiftN - initial_shift));
 			}
 		};
-
-		/*template<int root, int_t _min, int_t _max, int precision, class policy, int error>
-		struct root_type
-		{
-			static_assert(root > 0, "Root must be positive");
-			static_assert((root % 2) || _max > 0, "Even root inputs must have a positive range");
-
-		private:
-			static constexpr real_t nrt(real_t in)
-			{
-				return std::pow(in, 1.0/root);
-			}
-
-			static constexpr int base_precision = ceil((real_t)precision/root);
-			static constexpr int exp_diff = precision - (root*base_precision);
-		public:
-			static constexpr real_t m_root = exp_diff == 0 ? 1 : std::pow(2, (real_t)exp_diff/root);
-		private:
-			static constexpr int_t min_n = (_min <= 0) ? 0 : _min;
-			static constexpr int_t fn = min_n * policy::full_error;
-			static constexpr int base_error = m_root * nrt(2*fn + error - 2.0*nrt(fn*(fn + error))) * nrt(policy::full_error);
-			static constexpr error_set e_set = policy::truncate_error(base_precision, base_error);
-
-		public:
-
-			typedef fixed<
-				((root % 2) || _min > 0) ? floor(nrt(_min)) : 0,
-				ceil(nrt(_max)),
-				e_set.precision,
-				policy,
-				e_set.error
-				> type;
-		};*/
 	}
 }
 

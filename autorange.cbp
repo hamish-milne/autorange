@@ -47,6 +47,8 @@
 		<Unit filename="src/const_ops.hpp" />
 		<Unit filename="src/constant.hpp" />
 		<Unit filename="src/examples/fft.cpp" />
+		<Unit filename="src/examples/fir.cpp" />
+		<Unit filename="src/examples/iir.cpp" />
 		<Unit filename="src/examples/matrix.cpp" />
 		<Unit filename="src/fixed_const_ops.hpp" />
 		<Unit filename="src/fixed_ops.hpp" />

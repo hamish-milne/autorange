@@ -40,7 +40,7 @@ namespace arpea
 		/** \brief The real maximum value */
 		static constexpr real_t max = parse_R(Max);
 		/** \brief The error in fractions of the LSB. */
-		static constexpr int error = Error;
+		static constexpr int error = abs(Error);
 		/** \brief Whether the value can be negative */
 		static constexpr bool is_signed = min < 0;
 		/** \brief The policy class for this value */
@@ -108,6 +108,12 @@ namespace arpea
 		{
 		}
 
+		template<encoded_real MinB, encoded_real MaxB, int PrecisionB, int ErrorB>
+		constexpr fixed(fixed<MinB, MaxB, PrecisionB, policy, ErrorB> b, bool dummy)
+			: fixed(internal::conv_utype<fixed<Min, Max, Precision, policy, Error>>(b))
+		{
+		}
+
 	public:
 
 		/** \brief Initializes with zero */
@@ -121,6 +127,27 @@ namespace arpea
 		{
 		}
 
+		template<encoded_real MinB, encoded_real MaxB, int PrecisionB, int ErrorB>
+		constexpr fixed(fixed<MinB, MaxB, PrecisionB, policy, ErrorB> b)
+			: fixed(b, false)
+		{
+			static_assert(b.min >= min, "Invalid cast: Minimum value out of range");
+			static_assert(b.max <= max, "Invalid cast: Maximum value out of range");
+			static_assert(b.precision <= precision, "Invalid cast: Loss of precision");
+			static_assert(b.error >= error, "Invalid cast: Error too large");
+		}
+
+		template<encoded_real MinB, encoded_real MaxB, int PrecisionB, int ErrorB>
+		void acc(fixed<MinB, MaxB, PrecisionB, policy, ErrorB> b)
+		{
+			n = internal::conv_utype<fixed<Min, Max, Precision, policy, Error>>(b);
+		}
+
+		constexpr void zero()
+		{
+			n = 0;
+		}
+
 		#ifdef TESTING
 		constexpr fixed(real_t r) : fixed(calc_n(r), false)
 		{
@@ -129,6 +156,11 @@ namespace arpea
 
 		/** \brief Converts to a real value (for debug) */
         explicit constexpr operator real_t()
+		{
+			return step * n;
+		}
+
+        explicit constexpr operator double()
 		{
 			return step * n;
 		}

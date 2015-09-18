@@ -30,8 +30,8 @@ namespace arpea
                 e_set.error> sub_t;
 
         private:
-            static constexpr typename add_t::utype b_add = B::get_int(e_set.precision);
-            static constexpr typename sub_t::utype b_sub = B::get_int(e_set.precision);
+            static constexpr typename add_t::utype b_add = B::value * pow2(e_set.precision);
+            static constexpr typename sub_t::utype b_sub = B::value * pow2(e_set.precision);
 
         public:
             static constexpr add_t add(A a)
@@ -43,7 +43,31 @@ namespace arpea
             {
                 return sub_t::create(conv_utype<sub_t>(a) - b_sub);
             }
+        };
 
+        template<class A, class B>
+        struct const_sub_type
+        {
+		private:
+			static constexpr error_set e_set = A::policy::truncate_error(
+				A::precision, A::error + B::error);
+
+		public:
+			typedef fixed<
+				R(B::value - A::max),
+				R(B::value - A::min),
+				e_set.precision,
+				typename A::policy,
+				e_set.error> sub_t;
+
+		private:
+			static constexpr typename sub_t::utype b_sub = B::value * pow2(e_set.precision);
+
+		public:
+			static constexpr sub_t sub(A a)
+			{
+				return sub_t::create(b_sub - conv_utype<sub_t>(a));
+			}
         };
 
         template<class A, class B>
@@ -72,18 +96,18 @@ namespace arpea
                 e_set.error> type;
 
         private:
-            static constexpr typename type::utype b_n = B::get_int(e_set.precision);
+            static constexpr typename type::utype b_n = B::value * pow2(e_set.precision);
 
         public:
             static constexpr type mul(A a)
             {
                 /// We need to shift right by A::precision because we need to keep
                 /// the same precision as before.
-                return type::create(shift(typename type::utype(a.n * b_n), -A::precision));
+                return type::create(shift<-A::precision>(typename type::utype(a.n * b_n)));
             }
         };
 
-        template<class B, class A>
+        template<class A, class B>
         struct const_div_type
         {
             static_assert(A::min > 0 || A::max < 0, "Cannot divide by zero");
@@ -106,13 +130,12 @@ namespace arpea
         private:
             /// TODO: static asserts re. shifts?
             static constexpr int initial_shift = e_set.precision / 2;
-            static constexpr typename type::utype b_n =
-				B::get_int(A::precision + initial_shift);
+            static constexpr typename type::utype b_n = B::value * pow2(A::precision + initial_shift);
 
         public:
             static constexpr type div(A a)
             {
-                return type::create(shift(b_n / a.n, e_set.precision - initial_shift));
+                return type::create(shift<e_set.precision - initial_shift>(b_n / a.n));
             }
         };
 
@@ -125,7 +148,7 @@ namespace arpea
         	static constexpr real_t bValue = 1.0 / B::value;
             static constexpr int base_error = calc_mul_error<A, B>(bValue);
             static constexpr error_set e_set =
-				A::policy::truncate_error(A::precision, base_error);
+				A::policy::truncate_error(A::precision * 2, base_error);
 
         public:
             typedef fixed<
@@ -137,12 +160,12 @@ namespace arpea
 
         private:
             static constexpr typename type::utype b_n =
-				round(B::value * pow2(e_set.precision));
+				round(bValue * pow2(A::precision));
 
         public:
             static constexpr type div(A a)
             {
-                return type::create(conv_utype<type>(a) / b_n);
+                return type::create(shift<e_set.precision - (A::precision * 2)>(typename type::utype(a.n) * b_n));
             }
         };
     }

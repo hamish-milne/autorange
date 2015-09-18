@@ -38,7 +38,6 @@ namespace
 		CONST_TEST(/, 0, 0, 1);
 		CONST_TEST(/, 1, 1, 1);
 		CONST_TEST(/, 1, -1, -1);
-		//CONST_TEST(/, 12345, 0.12345, 0.00001);
 		CONST_TEST(/, 123456, 12345600000, 100000);
 		CONST_TEST(/, 0.025, 1, 40);
 	}

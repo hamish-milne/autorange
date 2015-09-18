@@ -2,7 +2,6 @@
 #define FIXED_OP_TYPES_HPP
 
 #include "../fixed_type.hpp"
-
 #include <type_traits>
 
 namespace arpea
@@ -96,7 +95,7 @@ namespace arpea
 
 			static constexpr type mul(A a, B b)
 			{
-				return type::create(shift(typename type::utype(a.n * b.n), shiftN));
+				return type::create(shift<shiftN>(typename type::utype(a.n * b.n)));
 			}
 
 		};
@@ -129,17 +128,26 @@ namespace arpea
 		struct div_type
 		{
 		private:
-            static constexpr int initial_shift = inv_type<B>::shiftN / 2;
 			typedef mul_type<A, typename inv_type<B>::type> mul_result;
+			/// This ensures that we don't shift any bits too far left
+			static constexpr int initial_shift = (mul_result::type::size - A::size) - inv_type<B>::shiftN;
+
+			/// Division of signed by unsigned can be bugged
+			typedef typename mul_result::type::policy::template ac_int<
+				mul_result::type::size, A::is_signed | B::is_signed>::type t_cast;
 
 		public:
 			typedef typename mul_result::type type;
 
 			static constexpr type div(A a, B b)
 			{
-				return type::create(shift(shift(
-					typename type::utype(a.n), inv_type<B>::shiftN + initial_shift) /
-					typename type::utype(b.n), mul_result::shiftN - initial_shift));
+				return type::create(
+					shift<mul_result::shiftN - initial_shift>(
+						shift<inv_type<B>::shiftN + initial_shift>(
+							t_cast(a.n)
+						) / t_cast(b.n)
+					)
+				);
 			}
 		};
 	}

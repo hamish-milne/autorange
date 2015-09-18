@@ -27,7 +27,7 @@ namespace arpea
 	}
 
 	FIXED_CONST_OP(+, const_add, const_add, add)
-	FIXED_CONST_OP(-, const_add, const_add, sub)
+	FIXED_CONST_OP(-, const_add, const_sub, sub)
 	FIXED_CONST_OP(*, const_mul, const_mul, mul)
 	FIXED_CONST_OP(/, div_by_const, const_div, div)
 

@@ -53,7 +53,7 @@ namespace arpea
          */
 		static constexpr int integral = arpea::max(
 			min >= 0 ? 0 : (clog2(-min) + 1),
-			max <= 0 ? 0 : (clog2(max) + (is_signed ? 1 : 0))
+			max <= 0 ? 0 : (clog2(max + 1) + (is_signed ? 1 : 0))
 		);
 
 		/** \brief The total size of the value in bits */
@@ -104,25 +104,25 @@ namespace arpea
 			);
 		}
 
-		explicit constexpr fixed(utype _n) : n(_n)
+		explicit constexpr fixed(utype _n, bool dummy) : n(_n)
 		{
 		}
 
 	public:
 
 		/** \brief Initializes with zero */
-		constexpr fixed() : fixed((utype)0)
+		constexpr fixed() : fixed((utype)0, false)
 		{
 		}
 
 		/** \brief Initializes with a constant value */
 		template<encoded_real cValue, encoded_real cError>
-		constexpr fixed(constant<cValue, cError> c) : fixed(calc_n(c._value))
+		constexpr fixed(constant<cValue, cError> c) : fixed(calc_n(c._value), false)
 		{
 		}
 
 		#ifdef TESTING
-		constexpr fixed(real_t r) : fixed(calc_n(r))
+		constexpr fixed(real_t r) : fixed(calc_n(r), false)
 		{
 		}
 		#endif
@@ -136,7 +136,7 @@ namespace arpea
 		/** \brief Initializes with a raw `utype` */
 		static constexpr fixed create(utype n)
 		{
-			return fixed(n);
+			return fixed(n, false);
 		}
 	};
 

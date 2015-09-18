@@ -137,17 +137,6 @@ namespace arpea
         );
 	}
 
-	/** \brief Left shift that allows negative values
-	 *
-	 * \param v  The value
-	 * \param s  The shift amount
-	 * \return `v >> -s` if `s < 0`, otherwise `v << s`
-	 */
-	template<typename T, typename U>
-	constexpr T shift(T v, U s)
-	{
-		return s < 0 ? v >> -s : v << s;
-	}
 
     /** \brief Calculates the absolute value of its input
      *
@@ -158,6 +147,42 @@ namespace arpea
 	constexpr T abs(T v)
 	{
         return v < 0 ? -v : v;
+	}
+
+	/// Because HLS tools don't necessarily optimize constant expressions,
+	/// we should enforce it at compile time to ensure shifts remain as a single
+	/// IR opcode.
+	namespace internal
+	{
+		template<int_t S, typename T, bool Negative>
+		struct shift_op_t
+		{
+			static constexpr T do_shift(T v)
+			{
+				return v << S;
+			}
+		};
+
+		template<int_t S, typename T>
+		struct shift_op_t<S, T, true>
+		{
+			static constexpr T do_shift(T v)
+			{
+				return v >> S;
+			}
+		};
+	}
+
+	/** \brief Left shift that allows negative values
+	 *
+	 * \param v  The value
+	 * \param s  The shift amount
+	 * \return `v >> -s` if `s < 0`, otherwise `v << s`
+	 */
+	template<int_t S, typename T>
+	constexpr T shift(T v)
+	{
+		return internal::shift_op_t<abs(S), T, (S < 0)>::do_shift(v);
 	}
 
 	/** \brief Calculates the required precision to get the given maximum error
@@ -197,7 +222,7 @@ namespace arpea
 		template<class A, class B>
 		static constexpr typename A::utype conv_utype(B b)
 		{
-            return shift(typename A::utype(b.n), A::precision - B::precision);
+            return shift<A::precision - B::precision>(typename A::utype(b.n));
 		}
 
 		constexpr int exponent_bits = (CHAR_BIT * sizeof(int8_t)) + 2;

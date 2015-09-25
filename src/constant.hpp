@@ -12,7 +12,8 @@ namespace arpea
 
 	/** \brief A constant value. Forces compile-time constant optimization.
 	 *  Constant values don't take representation into account, and can be
-	 *  assigned to any value unless their error is too high.
+	 *  assigned to any value unless their error is too high, or they are out
+	 *  of range.
 	 */
 	template<encoded_real Value, encoded_real Error = 0>
 	struct constant
@@ -25,19 +26,27 @@ namespace arpea
 		 */
 		static constexpr real_t error = parse_R(Error);
 
-		/// Workaround for ODR-usage bug (clang/gcc)
-		const real_t _value = value;
-		const real_t _error = error;
+		/// ODR-usage bug workaround
+		INLINE static constexpr real_t get_value() { return value; }
+		INLINE static constexpr real_t get_error() { return error; }
 
 		constexpr constant()
 		{
 		}
 
-		constexpr operator real_t()
+		INLINE constexpr operator real_t()
 		{
 			return value;
 		}
 	};
+
+	const constant<0> zero;
+
+	template<encoded_real Value, encoded_real Error = 0>
+	static constexpr constant<Value, Error> get_const()
+	{
+		return constant<Value, Error>();
+	}
 
 	/**
 	 * @}

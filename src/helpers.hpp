@@ -76,14 +76,14 @@ namespace arpea
 		return (v - int_t(v)) > 0 ? int_t(v)+1 : int_t(v);
 	}
 
-    /** \brief Rounds a number to its closest integer
-     *
-     * \param v  The value to round
-     * \return `v` rounded up or down
-     */
+	/** \brief Rounds a number to its closest integer
+	 *
+	 * \param v  The value to round
+	 * \return `v` rounded up or down
+	 */
 	constexpr int_t round(real_t v)
 	{
-        return (v - int_t(v)) >= 0.5 ? int_t(v)+1 : int_t(v);
+		return (v - int_t(v)) >= 0.5 ? int_t(v)+1 : int_t(v);
 	}
 
 	/** \brief Calculates the base-2 logarithm, rounded upwards
@@ -95,18 +95,18 @@ namespace arpea
 	constexpr int_t clog2(real_t v)
 	{
 		return v <= 0 ? (
-            throw std::logic_error("clog2: Value must be positive")
-        ) : (
-            v <= 0.5 ? (
-                clog2(v*2)-1
-            ) : (
-                v <= 1 ? (
-                    0
-                ) : (
-                    clog2(v/2)+1
-                )
-            )
-        );
+			throw std::logic_error("clog2: Value must be positive")
+		) : (
+			v <= 0.5 ? (
+				clog2(v*2)-1
+			) : (
+				v <= 1 ? (
+					0
+				) : (
+					clog2(v/2)+1
+				)
+			)
+		);
 	}
 
 	/** \brief Calculates the base-2 logarithm, rounded upwards
@@ -127,26 +127,26 @@ namespace arpea
 	constexpr real_t pow2(int_t e)
 	{
 		return e == 0 ? (
-            1
-        ) : (
-            e < 0 ? (
-                pow2(e+1)/2
-            ) : (
-                pow2(e-1)*2
-            )
-        );
+			1
+		) : (
+			e < 0 ? (
+				pow2(e+1)/2
+			) : (
+				pow2(e-1)*2
+			)
+		);
 	}
 
 
-    /** \brief Calculates the absolute value of its input
-     *
-     * \param v  The value
-     * \return `v` if it is positive, or `-v` if it is negative
-     */
+	/** \brief Calculates the absolute value of its input
+	 *
+	 * \param v  The value
+	 * \return `v` if it is positive, or `-v` if it is negative
+	 */
 	template<typename T>
 	constexpr T abs(T v)
 	{
-        return v < 0 ? -v : v;
+		return v < 0 ? -v : v;
 	}
 
 	/// Because HLS tools don't necessarily optimize constant expressions,
@@ -157,7 +157,7 @@ namespace arpea
 		template<int_t S, typename T, bool Negative>
 		struct shift_op_t
 		{
-			static constexpr T do_shift(T v)
+			INLINE static constexpr T do_shift(T v)
 			{
 				return v << S;
 			}
@@ -166,7 +166,7 @@ namespace arpea
 		template<int_t S, typename T>
 		struct shift_op_t<S, T, true>
 		{
-			static constexpr T do_shift(T v)
+			INLINE static constexpr T do_shift(T v)
 			{
 				return v >> S;
 			}
@@ -180,7 +180,7 @@ namespace arpea
 	 * \return `v >> -s` if `s < 0`, otherwise `v << s`
 	 */
 	template<int_t S, typename T>
-	constexpr T shift(T v)
+	INLINE constexpr T shift(T v)
 	{
 		return internal::shift_op_t<abs(S), T, (S < 0)>::do_shift(v);
 	}
@@ -195,34 +195,34 @@ namespace arpea
 		return clog2(1.0/abs(e));
 	}
 
-    /** \brief Shifts an integer to the left.
-     *  This is a clang workaround, since it doesn't allow negative values to be
-     *  shifted left.
-     *
-     * \param value  The value to shift
-     * \param shift  The number of places to shift it by
-     * \return `value << shift`
-     */
+	/** \brief Shifts an integer to the left.
+	 *  This is a clang workaround, since it doesn't allow negative values to be
+	 *  shifted left.
+	 *
+	 * \param value  The value to shift
+	 * \param shift  The number of places to shift it by
+	 * \return `value << shift`
+	 */
 	template<class T>
-    constexpr T shift_left(T value, int_t shift)
-    {
-        return value >= 0 ? (value << shift) :
-            uint_t(value) << shift;
-    }
+	constexpr T shift_left(T value, int_t shift)
+	{
+		return value >= 0 ? (value << shift) :
+			uint_t(value) << shift;
+	}
 
 	/** \brief Denotes a parameter that should be the return value of `R()`
 	 *
 	 * To avoid errors, positive integers can be used here as well.
 	 * However, raw negative integers won't work, and will cause obscure errors.
 	 */
-    typedef uintmax_t encoded_real;
+	typedef uintmax_t encoded_real;
 
 	namespace internal
 	{
 		template<class A, class B>
-		static constexpr typename A::utype conv_utype(B b)
+		INLINE static constexpr typename A::utype conv_utype(B b)
 		{
-            return shift<A::precision - B::precision>(typename A::utype(b.n));
+			return shift<A::precision - B::precision>(typename A::utype(b.n));
 		}
 
 		constexpr int exponent_bits = (CHAR_BIT * sizeof(int8_t)) + 2;
@@ -265,8 +265,8 @@ namespace arpea
 	{
 		using namespace internal;
 		return !(data & fp_bit) ? data : (
-            ((data & sign_bit) ? -1 : 1) *
-            (int_t)((data & mantissa_mask) + ((encoded_real)1 << mantissa_bits)) *
+			((data & sign_bit) ? -1 : 1) *
+			(int_t)((data & mantissa_mask) + ((encoded_real)1 << mantissa_bits)) *
 			pow2((real_t)(int8_t)((data & ~sign_bit) >> mantissa_bits) - mantissa_bits)
 		);
 	}

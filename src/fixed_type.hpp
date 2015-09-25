@@ -14,6 +14,15 @@ namespace arpea
 	 * @{
 	 */
 
+	namespace internal
+	{
+		template<int_t Value>
+		static constexpr int_t integer_constant()
+		{
+			return Value;
+		}
+	}
+
 	/** \brief A fixed-point variable
 	 *
 	 * \param Min  The minimum value [Use `R()`]
@@ -34,8 +43,8 @@ namespace arpea
 		/** \brief The number of fractional bits. Can be negative */
 		static constexpr int precision = Precision;
 		/** \brief The smallest possible difference between two values of this type */
-        static constexpr real_t step = pow2(-precision);
-        /** \brief The real minimum value */
+		static constexpr real_t step = pow2(-precision);
+		/** \brief The real minimum value */
 		static constexpr real_t min = parse_R(Min);
 		/** \brief The real maximum value */
 		static constexpr real_t max = parse_R(Max);
@@ -46,11 +55,11 @@ namespace arpea
 		/** \brief The policy class for this value */
 		typedef Policy policy;
 
-        /** \brief The number of integer bits
-         *
-         * It can be negative, which would happen if both `min` and `max` were
-         * very small.
-         */
+		/** \brief The number of integer bits
+		 *
+		 * It can be negative, which would happen if both `min` and `max` were
+		 * very small.
+		 */
 		static constexpr int integral = arpea::max(
 			min >= 0 ? 0 : (clog2(-min) + 1),
 			max <= 0 ? 0 : (clog2(max + 1) + (is_signed ? 1 : 0))
@@ -74,19 +83,30 @@ namespace arpea
 		/** \brief The underlying value */
 		utype n;
 
-        /// Workaround for ODR-usage bug (clang/gcc)
-		const real_t _step = step;
-		const real_t _min = min;
-		const real_t _max = max;
-		const real_t _real_error = real_error;
+		/// ODR-usage bug workaround
+		INLINE static constexpr real_t get_step() { return step; }
+		INLINE static constexpr real_t get_min() { return min; }
+		INLINE static constexpr real_t get_max() { return max; }
+		INLINE static constexpr real_t get_real_error() { return real_error; }
 
 	private:
 
-		static constexpr utype sign_extend_const = shift_left((utype)-1, size - 1);
-
-		static constexpr utype sign_extend(utype n)
+		INLINE explicit constexpr fixed(utype _n, bool dummy) : n(_n)
 		{
-			return (n & ((utype)1<<(size - 1))) ? (n | sign_extend_const) : n;
+		}
+
+		template<encoded_real MinB, encoded_real MaxB, int PrecisionB, int ErrorB>
+		INLINE constexpr fixed(fixed<MinB, MaxB, PrecisionB, policy, ErrorB> b, bool dummy)
+			: fixed(internal::conv_utype<fixed<Min, Max, Precision, policy, Error>>(b))
+		{
+		}
+
+		static constexpr utype sign_extend_const = shift_left((utype)-1, size - 1);
+		static constexpr utype sign_bit = (utype)1<<(size - 1);
+
+		INLINE static constexpr utype sign_extend(utype n)
+		{
+			return (n & sign_bit) ? (n | sign_extend_const) : n;
 		}
 
 		static constexpr int_t pshift = pow2(precision);
@@ -104,69 +124,81 @@ namespace arpea
 			);
 		}
 
-		explicit constexpr fixed(utype _n, bool dummy) : n(_n)
-		{
-		}
-
-		template<encoded_real MinB, encoded_real MaxB, int PrecisionB, int ErrorB>
-		constexpr fixed(fixed<MinB, MaxB, PrecisionB, policy, ErrorB> b, bool dummy)
-			: fixed(internal::conv_utype<fixed<Min, Max, Precision, policy, Error>>(b))
-		{
-		}
-
 	public:
 
 		/** \brief Initializes with zero */
-		constexpr fixed() : fixed((utype)0, false)
+		INLINE constexpr fixed() : fixed((utype)0, false)
+		{
+		}
+
+		/// Explicit copy constructors to avoid errors
+		INLINE constexpr fixed(fixed& x) : fixed(x.n, false)
+		{
+		}
+
+		INLINE constexpr fixed(const fixed& x) : fixed(x.n, false)
+		{
+		}
+
+		INLINE constexpr fixed(volatile fixed& x) : fixed(x.n, false)
+		{
+		}
+
+		INLINE constexpr fixed(const volatile fixed& x) : fixed(x.n, false)
 		{
 		}
 
 		/** \brief Initializes with a constant value */
 		template<encoded_real cValue, encoded_real cError>
-		constexpr fixed(constant<cValue, cError> c) : fixed(calc_n(c._value), false)
+		INLINE constexpr fixed(constant<cValue, cError> c) : fixed(
+				(utype)internal::integer_constant<calc_n(decltype(c)::get_value())>(), false)
 		{
+			static_assert(decltype(c)::get_value() >= min, "Constant value too low");
+			static_assert(decltype(c)::get_value() <= max, "Constant value too high");
+		}
+
+		/** \brief Converts from another fixed-point value */
+		template<encoded_real MinB, encoded_real MaxB, int PrecisionB, int ErrorB>
+		INLINE constexpr fixed(fixed<MinB, MaxB, PrecisionB, policy, ErrorB> b)
+			: fixed(internal::conv_utype<fixed>(b), false)
+		{
+			static_assert(decltype(b)::get_min() >= min, "Invalid cast: Minimum value out of range");
+			static_assert(decltype(b)::get_max() <= max, "Invalid cast: Maximum value out of range");
+			//static_assert(PrecisionB <= Precision, "Invalid cast: Loss of precision");
+			static_assert(decltype(b)::get_real_error() <= real_error, "Invalid cast: Error too large");
 		}
 
 		template<encoded_real MinB, encoded_real MaxB, int PrecisionB, int ErrorB>
-		constexpr fixed(fixed<MinB, MaxB, PrecisionB, policy, ErrorB> b)
-			: fixed(b, false)
+		INLINE void acc(fixed<MinB, MaxB, PrecisionB, policy, ErrorB> b)
 		{
-			static_assert(b.min >= min, "Invalid cast: Minimum value out of range");
-			static_assert(b.max <= max, "Invalid cast: Maximum value out of range");
-			static_assert(b.precision <= precision, "Invalid cast: Loss of precision");
-			static_assert(b.error >= error, "Invalid cast: Error too large");
+			n = internal::conv_utype<fixed>(b);
 		}
 
-		template<encoded_real MinB, encoded_real MaxB, int PrecisionB, int ErrorB>
-		void acc(fixed<MinB, MaxB, PrecisionB, policy, ErrorB> b)
+		template<encoded_real Value>
+		INLINE void init()
 		{
-			n = internal::conv_utype<fixed<Min, Max, Precision, policy, Error>>(b);
-		}
-
-		constexpr void zero()
-		{
-			n = 0;
+			n = (utype)internal::integer_constant<calc_n(parse_R(Value))>();
 		}
 
 		#ifdef TESTING
-		constexpr fixed(real_t r) : fixed(calc_n(r), false)
+		INLINE constexpr fixed(real_t r) : fixed(calc_n(r), false)
 		{
 		}
 		#endif
 
 		/** \brief Converts to a real value (for debug) */
-        explicit constexpr operator real_t()
+		INLINE explicit constexpr operator real_t()
 		{
 			return step * n;
 		}
 
-        explicit constexpr operator double()
+		INLINE explicit constexpr operator double()
 		{
 			return step * n;
 		}
 
 		/** \brief Initializes with a raw `utype` */
-		static constexpr fixed create(utype n)
+		INLINE static constexpr fixed create(utype n)
 		{
 			return fixed(n, false);
 		}

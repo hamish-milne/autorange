@@ -13,21 +13,21 @@ namespace arpea
 	 * @{
 	 */
 
-    /** \brief Used to force stop compilation when a requested integer
-     *         is too large.
-     */
+	/** \brief Used to force stop compilation when a requested integer
+	 *		 is too large.
+	 */
 	template<bool assert>
 	struct size_error_t
 	{
 		static_assert(assert, "Unable to store the requested size!");
 	};
 
-    /** \brief A default fixed-width integer type for compilers without an
-     *         HDL-specific frontend.
-     *
-     *  \param Size    The size of the integer in bits
-     *  \param Signed  Whether to use a signed type. Signed types will extend the sign bit
-     */
+	/** \brief A default fixed-width integer type for compilers without an
+	 *		 HDL-specific frontend.
+	 *
+	 *  \param Size	The size of the integer in bits
+	 *  \param Signed  Whether to use a signed type. Signed types will extend the sign bit
+	 */
 	template<int Size, bool Signed = true>
 	struct ac_int_default
 	{
@@ -44,8 +44,8 @@ namespace arpea
 		typedef typename selector<type_32_16, int8_t>::type type;
 	};
 
-    /** \brief Unsigned specialisation of `ac_int_default`
-     */
+	/** \brief Unsigned specialisation of `ac_int_default`
+	 */
 	template<int Size>
 	struct ac_int_default<Size, false>
 	{

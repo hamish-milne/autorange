@@ -28,7 +28,7 @@ namespace arpea
 		encoded_real ValueA, encoded_real ErrorA, \
 		encoded_real ValueB, encoded_real ErrorB \
 		> \
-	constexpr auto operator op(constant<ValueA, ErrorA> a, constant<ValueB, ErrorB> b) \
+	INLINE constexpr auto operator op(constant<ValueA, ErrorA> a, constant<ValueB, ErrorB> b) \
 		-> tresult<decltype(a),decltype(b)> \
 	{ \
 		return tresult<decltype(a),decltype(b)>(); \

@@ -8,6 +8,12 @@
 #pragma clang diagnostic ignored "-Wconstexpr-not-const"
 #endif
 
+#if defined(__clang__) || defined(__GNUC__)
+#define INLINE __attribute__((always_inline))
+#else
+#define INLINE
+#endif
+
 namespace arpea
 {
 	/**
@@ -15,7 +21,7 @@ namespace arpea
 	 * @{
 	 */
 
-    /** \brief A large signed integer type */
+	/** \brief A large signed integer type */
 	typedef intmax_t int_t;
 
 	/** \brief A large unsigned integer type */

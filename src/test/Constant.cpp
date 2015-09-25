@@ -6,7 +6,7 @@ using namespace arpea;
 
 namespace
 {
-	#define CONST_TEST(op, c, a, b) CHECK_CLOSE(c, (constant<R(a)>() op constant<R(b)>())._value, R_epsilon)
+	#define CONST_TEST(op, c, a, b) CHECK_CLOSE(c, decltype(constant<R(a)>() op constant<R(b)>())::get_value(), R_epsilon)
 
 	TEST(ConstantAdd)
 	{

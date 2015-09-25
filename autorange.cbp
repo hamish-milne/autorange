@@ -46,8 +46,10 @@
 		<Unit filename="src/arpea_core.hpp" />
 		<Unit filename="src/const_ops.hpp" />
 		<Unit filename="src/constant.hpp" />
-		<Unit filename="src/examples/fft.cpp" />
+		<Unit filename="src/examples/dft.cpp" />
+		<Unit filename="src/examples/dft_base.cpp" />
 		<Unit filename="src/examples/fir.cpp" />
+		<Unit filename="src/examples/fir_base.cpp" />
 		<Unit filename="src/examples/iir.cpp" />
 		<Unit filename="src/examples/matrix.cpp" />
 		<Unit filename="src/fixed_const_ops.hpp" />

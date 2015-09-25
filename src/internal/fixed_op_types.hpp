@@ -43,12 +43,12 @@ namespace arpea
 						  e_set.error
 						  > sub_t;
 
-			static add_t add(A a, B b)
+			INLINE static constexpr add_t add(A a, B b)
 			{
 				return add_t::create(conv_utype<add_t>(a) + conv_utype<add_t>(b));
 			}
 
-			static sub_t sub(A a, B b)
+			INLINE static constexpr sub_t sub(A a, B b)
 			{
 				return sub_t::create(conv_utype<add_t>(a) - conv_utype<add_t>(b));
 			}
@@ -59,7 +59,7 @@ namespace arpea
 		{
 			typedef fixed<-A::max, -A::min, A::precision, typename A::policy, A::error> type;
 
-			constexpr type neg(A a)
+			INLINE static constexpr type neg(A a)
 			{
 				return type::create(-type::utype(a.n));
 			}
@@ -91,9 +91,9 @@ namespace arpea
 						  e_set.error
 						  > type;
 
-            static constexpr int shiftN = e_set.precision - base_precision;
+			static constexpr int shiftN = e_set.precision - base_precision;
 
-			static constexpr type mul(A a, B b)
+			INLINE static constexpr type mul(A a, B b)
 			{
 				return type::create(shift<shiftN>(typename type::utype(a.n * b.n)));
 			}
@@ -139,7 +139,7 @@ namespace arpea
 		public:
 			typedef typename mul_result::type type;
 
-			static constexpr type div(A a, B b)
+			INLINE static constexpr type div(A a, B b)
 			{
 				return type::create(
 					shift<mul_result::shiftN - initial_shift>(

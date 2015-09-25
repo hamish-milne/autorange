@@ -1,7 +1,7 @@
 #include "UnitTest++.h"
 #define TESTING
 
-void fft();
+void dft();
 void matrix();
 void fir();
 void iir();
@@ -9,7 +9,7 @@ void iir();
 int main()
 {
 	UnitTest::RunAllTests();
-	fft();
+	dft();
 	matrix();
 	fir();
 	iir();

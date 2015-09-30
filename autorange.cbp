@@ -43,6 +43,7 @@
 			<Add library="UnitTest++\Deliv\Release\libUnitTest++.a" />
 		</Linker>
 		<Unit filename="src/ac_int_default.hpp" />
+		<Unit filename="src/arpea_all.hpp" />
 		<Unit filename="src/arpea_core.hpp" />
 		<Unit filename="src/const_ops.hpp" />
 		<Unit filename="src/constant.hpp" />
@@ -51,12 +52,15 @@
 		<Unit filename="src/examples/fir.cpp" />
 		<Unit filename="src/examples/fir_base.cpp" />
 		<Unit filename="src/examples/iir.cpp" />
+		<Unit filename="src/examples/iir_base.cpp" />
 		<Unit filename="src/examples/matrix.cpp" />
+		<Unit filename="src/examples/matrix_base.cpp" />
 		<Unit filename="src/fixed_const_ops.hpp" />
 		<Unit filename="src/fixed_ops.hpp" />
 		<Unit filename="src/fixed_type.hpp" />
 		<Unit filename="src/floating_type.hpp" />
 		<Unit filename="src/helpers.hpp" />
+		<Unit filename="src/initialize.hpp" />
 		<Unit filename="src/internal/fixed_const_op_types.hpp" />
 		<Unit filename="src/internal/fixed_op_types.hpp" />
 		<Unit filename="src/main.cpp" />

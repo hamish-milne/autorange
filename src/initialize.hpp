@@ -1,5 +1,5 @@
 #ifndef INITIALIZE_HPP
-#define INITLALIZE_HPP
+#define INITIALIZE_HPP
 
 #include "constant.hpp"
 

@@ -1,13 +1,23 @@
-
-#define TESTING
-#include "../fixed_ops.hpp"
-#include "../fixed_const_ops.hpp"
 #include <cstdio>
-
+#include "../arpea_all.hpp"
 using namespace arpea;
+
+static volatile fixed<R(-10), R(10), P(0.001)> input[13];
+
+
+
+
+
+static fixed<R(-10), R(10), P(0.001)> output[13];
 
 void iir()
 {
+	initialize<ArrayValues<
+		0, R(-0.3), R(-0.5), R(-0.3),
+		0, R( 0.3), R( 0.5), R( 0.3),
+		0, R(-0.3), R(-0.5), R(-0.3), 0>>(input);
+	initialize<ArraySet<0, 13>>(output);
+
 	constant<R(0.7)> c1;
 	constant<R(0.9)> c2;
 	constant<R(0.3)> c3;
@@ -17,9 +27,6 @@ void iir()
 	constant<R(-0.3)> d2;
 	constant<R(0.2)> d3;
 	constant<R(-0.1)> d4;
-
-	fixed<R(-10), R(10), P(0.001)> input[] = { 0, -0.3, -0.5, -0.3, 0, 0.3, 0.5, 0.3, 0, -0.3, -0.5, -0.3, 0 };
-	fixed<R(-10), R(10), P(0.001)> output[] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 	for(int i = 3; i < 13; i++)
 	{

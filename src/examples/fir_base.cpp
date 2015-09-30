@@ -1,5 +1,3 @@
-
-
 #include <cstdio>
 
 
@@ -10,16 +8,19 @@ static volatile float input[] =
 	0, 0.3, 0.5, 0.3,
 	0, -0.3, -0.5, -0.3, 0
 };
+static float output[9];
 
 void fir_base()
 {
-	float
+
+
+
+
+	const float
 		c1 = 0.7,
 		c2 = 0.9,
 		c3 = 0.3,
 		c4 = 0.1;
-
-	float output[9];
 
 	for(int i = 3; i < 13; i++)
 	{

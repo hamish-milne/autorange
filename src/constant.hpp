@@ -30,7 +30,7 @@ namespace arpea
 		INLINE static constexpr real_t get_value() { return value; }
 		INLINE static constexpr real_t get_error() { return error; }
 
-		constexpr constant()
+		INLINE constexpr constant()
 		{
 		}
 

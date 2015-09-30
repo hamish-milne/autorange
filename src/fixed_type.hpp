@@ -131,7 +131,7 @@ namespace arpea
 		{
 		}
 
-		/// Explicit copy constructors to avoid errors
+		/// Explicit copy constructors to avoid errors *cough*clang*cough*
 		INLINE constexpr fixed(fixed& x) : fixed(x.n, false)
 		{
 		}
@@ -148,34 +148,42 @@ namespace arpea
 		{
 		}
 
+		/// We have to define operators rather than casts here, because
+		/// clang has trouble with volatile types.
+		/// The downside is that array initializations aren't possible,
+		/// but LegUp has trouble with these anyway - use 'initialize' instead
+
 		/** \brief Initializes with a constant value */
 		template<encoded_real cValue, encoded_real cError>
-		INLINE constexpr fixed(constant<cValue, cError> c) : fixed(
-				(utype)internal::integer_constant<calc_n(decltype(c)::get_value())>(), false)
+		INLINE volatile fixed operator= (constant<cValue, cError> c) volatile
 		{
 			static_assert(decltype(c)::get_value() >= min, "Constant value too low");
 			static_assert(decltype(c)::get_value() <= max, "Constant value too high");
+			n = (utype)internal::integer_constant<calc_n(decltype(c)::get_value())>();
+			return *this;
 		}
+
 
 		/** \brief Converts from another fixed-point value */
 		template<encoded_real MinB, encoded_real MaxB, int PrecisionB, int ErrorB>
-		INLINE constexpr fixed(fixed<MinB, MaxB, PrecisionB, policy, ErrorB> b)
-			: fixed(internal::conv_utype<fixed>(b), false)
+		INLINE volatile fixed operator= (fixed<MinB, MaxB, PrecisionB, policy, ErrorB> b) volatile
 		{
 			static_assert(decltype(b)::get_min() >= min, "Invalid cast: Minimum value out of range");
 			static_assert(decltype(b)::get_max() <= max, "Invalid cast: Maximum value out of range");
 			//static_assert(PrecisionB <= Precision, "Invalid cast: Loss of precision");
 			static_assert(decltype(b)::get_real_error() <= real_error, "Invalid cast: Error too large");
+			n = internal::conv_utype<fixed>(b);
+			return *this;
 		}
 
 		template<encoded_real MinB, encoded_real MaxB, int PrecisionB, int ErrorB>
-		INLINE void acc(fixed<MinB, MaxB, PrecisionB, policy, ErrorB> b)
+		INLINE void acc(fixed<MinB, MaxB, PrecisionB, policy, ErrorB> b) volatile
 		{
 			n = internal::conv_utype<fixed>(b);
 		}
 
 		template<encoded_real Value>
-		INLINE void init()
+		INLINE void init() volatile
 		{
 			n = (utype)internal::integer_constant<calc_n(parse_R(Value))>();
 		}
@@ -187,12 +195,12 @@ namespace arpea
 		#endif
 
 		/** \brief Converts to a real value (for debug) */
-		INLINE explicit constexpr operator real_t()
+		INLINE explicit constexpr operator real_t() volatile
 		{
 			return step * n;
 		}
 
-		INLINE explicit constexpr operator double()
+		INLINE explicit constexpr operator double() volatile
 		{
 			return step * n;
 		}

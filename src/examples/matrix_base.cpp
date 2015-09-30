@@ -2,20 +2,20 @@
 #include "../arpea_all.hpp"
 using namespace arpea;
 
-static volatile integer<1, 6> a[2][3];
-static integer<24, 198> ba[2][2];
+static volatile int a[2][3] = { {1, 2, 3}, { 4, 5, 6} };
+static int ba[2][2];
 
-void matrix()
+void matrix_base()
 {
-	initialize<ArrayValues<1, 2, 3>>(a[0]);
-	initialize<ArrayValues<4, 5, 6>>(a[1]);
 
-	constant<7> b11;
-	constant<8> b12;
-	constant<9> b13;
-	constant<10> b21;
-	constant<11> b22;
-	constant<12> b23;
+
+	const int
+		b11 = 7,
+		b12 = 8,
+		b13 = 9,
+		b21 = 10,
+		b22 = 11,
+		b23 = 12;
 
 	ba[0][0] = b11*a[0][0] + b12*a[0][1] + b13*a[0][2];
 	ba[0][1] = b11*a[1][0] + b12*a[1][1] + b13*a[1][2];

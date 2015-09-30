@@ -1,25 +1,26 @@
-#include "../fixed_ops.hpp"
-#include "../fixed_const_ops.hpp"
 #include <cstdio>
-
+#include "../arpea_all.hpp"
 using namespace arpea;
 
-static fixed<R(-10), R(10), P(0.001)> input[] =
-{
-	zero, constant<R(-0.3)>(), constant<R(-0.5)>(), constant<R(-0.3)>(),
-	zero, constant<R( 0.3)>(), constant<R( 0.5)>(), constant<R( 0.3)>(),
-	zero, constant<R(-0.3)>(), constant<R(-0.5)>(), constant<R(-0.3)>(), zero
-};
+static volatile fixed<R(-10), R(10), P(0.001)> input[13];
+
+
+
+
+
+static fixed<R(-20), R(20), P(0.004)> output[9];
 
 void fir()
 {
+	initialize<ArrayValues<
+		0, R(-0.3), R(-0.5), R(-0.3),
+		0, R( 0.3), R( 0.5), R( 0.3),
+		0, R(-0.3), R(-0.5), R(-0.3), 0>>(input);
 
 	constant<R(0.7)> c1;
 	constant<R(0.9)> c2;
 	constant<R(0.3)> c3;
 	constant<R(0.1)> c4;
-
-	fixed<R(-20), R(20), P(0.004)> output[9];
 
 	for(int i = 3; i < 13; i++)
 	{

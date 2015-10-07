@@ -1,23 +1,7 @@
-#include <cstdio>
-#include "../arpea_all.hpp"
-using namespace arpea;
+#include "testbench.hpp"
 
-static volatile fixed<R(-10), R(10), P(0.001)> input[13];
-
-
-
-
-
-static fixed<R(-10), R(10), P(0.001)> output[13];
-
-void iir()
+void iir(volatile input_t input[], output_t output[])
 {
-	initialize<ArrayValues<
-		0, R(-0.3), R(-0.5), R(-0.3),
-		0, R( 0.3), R( 0.5), R( 0.3),
-		0, R(-0.3), R(-0.5), R(-0.3), 0>>(input);
-	initialize<ArraySet<0, 13>>(output);
-
 	constant<R(0.7)> c1;
 	constant<R(0.9)> c2;
 	constant<R(0.3)> c3;
@@ -28,15 +12,20 @@ void iir()
 	constant<R(0.2)> d3;
 	constant<R(-0.1)> d4;
 
-	for(int i = 3; i < 13; i++)
-	{
-		output[i].acc(input[i]*c4 + input[i-1]*c3 + input[i-2]*c2 + input[i-3]*c1
-		+ output[i]*d4 + output[i-1]*d3 + output[i-2]*d2 + output[i-3]*d1);
-	}
+	input_t _input[LENGTH + 3];
+	output_t _output[LENGTH + 3];
 
-	printf("{%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f}\n",
-			(double)output[0], (double)output[1], (double)output[2],
-			(double)output[3], (double)output[4], (double)output[5],
-			(double)output[6], (double)output[7], (double)output[8],
-			(double)output[9], (double)output[10], (double)output[11], (double)output[12]);
+	for(int i = 0; i < 3; i++)
+		_input[i] = zero;
+	for(int i = 0; i < LENGTH; i++)
+		_input[i+3] = input[i];
+	for(int i = 0; i < LENGTH + 3; i++)
+		_output[i] = zero;
+
+	for(int i = 3; i < LENGTH + 3; i++)
+	{
+		_output[i].acc(_input[i]*c4 + _input[i-1]*c3 + _input[i-2]*c2 + _input[i-3]*c1
+		+ _output[i]*d4 + _output[i-1]*d3 + _output[i-2]*d2 + _output[i-3]*d1);
+		output[i-3] = _output[i];
+	}
 }

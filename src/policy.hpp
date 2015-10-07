@@ -25,6 +25,29 @@ namespace arpea
 		}
 	};
 
+	/** \brief Describes if casts to a different precision are allowed
+	 */
+	enum precision_cast_mode_t
+	{
+		/** \brief Require the same precision */
+		PRECISION_CAST_EXACT = 0,
+
+		/** \brief Allow casts to a lower precision, but not to a higher one
+		 * This can prevent any misleadingly precise values
+		 */
+		PRECISION_CAST_LOWER = 1,
+
+		/** \brief Allow casts to a higher precision, but not to a lower one
+		 * This can prevent any loss of data in conversions
+		 */
+		PRECISION_CAST_HIGHER = 2,
+
+		/** \brief Don't check precision when casting
+		 * This is less 'safe', but might be required for a given use case
+		 */
+		PRECISION_CAST_ALLOW = 3,
+	};
+
 	/** \brief The default policy class for the `fixed` type
 	 *
 	 */
@@ -59,7 +82,7 @@ namespace arpea
 		 * This should be `false` to guarantee the accuracy of the error value,
 		 * but may need to be enabled to allow 'drop-in' replacement of existing code.
 		 */
-		static constexpr bool allow_improper_cast = true;
+		static constexpr bool allow_improper_error = false;
 
 		/** \brief Decreases precision for high error values
 		 *
@@ -72,6 +95,10 @@ namespace arpea
 			return error > max_error ? truncate_error(precision - 1, ceil((real_t)error/2)
 				+ full_error/2) : error_set(precision, error);
 		}
+
+		/** \brief Whether to allow casts to a different precision
+		 */
+		static constexpr precision_cast_mode_t precision_cast_mode = PRECISION_CAST_ALLOW;
 
 		/** \brief The exact-width integer type to use
 		 */

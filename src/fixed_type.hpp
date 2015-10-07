@@ -102,6 +102,7 @@ namespace arpea
 		}
 
 		static constexpr utype sign_extend_const = shift_left((utype)-1, size - 1);
+		static constexpr intmax_t int_sign_extend = shift_left((int)-1, size - 1);
 		static constexpr utype sign_bit = (utype)1<<(size - 1);
 
 		INLINE static constexpr utype sign_extend(utype n)
@@ -202,7 +203,13 @@ namespace arpea
 
 		INLINE explicit constexpr operator double() volatile
 		{
-			return step * n;
+			return double(step) * n;
+		}
+
+		INLINE explicit constexpr operator int() volatile
+		{
+			return (int)(float(step) *
+				(n < 0 ? (int(n) | int_sign_extend) : int(n)));
 		}
 
 		/** \brief Initializes with a raw `utype` */

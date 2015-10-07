@@ -1,27 +1,16 @@
-#include <cstdio>
-#include "../arpea_all.hpp"
-using namespace arpea;
+#include "testbench.hpp"
 
-static volatile integer<1, 6> a[2][3];
-static integer<24, 198> ba[2][2];
-
-void matrix()
+void matrix(volatile input_t a[], output_t output[])
 {
-	initialize<ArrayValues<1, 2, 3>>(a[0]);
-	initialize<ArrayValues<4, 5, 6>>(a[1]);
+	constant<R(-3)> b11;
+	constant<R(-2)> b12;
+	constant<R(-1)> b13;
+	constant<1> b21;
+	constant<2> b22;
+	constant<3> b23;
 
-	constant<7> b11;
-	constant<8> b12;
-	constant<9> b13;
-	constant<10> b21;
-	constant<11> b22;
-	constant<12> b23;
-
-	ba[0][0] = b11*a[0][0] + b12*a[0][1] + b13*a[0][2];
-	ba[0][1] = b11*a[1][0] + b12*a[1][1] + b13*a[1][2];
-	ba[1][0] = b21*a[0][0] + b22*a[0][1] + b23*a[0][2];
-	ba[1][1] = b21*a[1][0] + b22*a[1][1] + b23*a[1][2];
-
-	printf("[[%f, %f], [%f, %f]]\n",
-		(double)ba[0][0], (double)ba[0][1], (double)ba[1][0], (double)ba[1][1]);
+	output[0] = b11*a[0] + b12*a[1] + b13*a[2];
+	output[1] = b11*a[3] + b12*a[4] + b13*a[5];
+	output[2] = b21*a[0] + b22*a[1] + b23*a[2];
+	output[3] = b21*a[3] + b22*a[4] + b23*a[5];
 }

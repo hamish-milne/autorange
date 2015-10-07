@@ -55,6 +55,8 @@
 		<Unit filename="src/examples/iir_base.cpp" />
 		<Unit filename="src/examples/matrix.cpp" />
 		<Unit filename="src/examples/matrix_base.cpp" />
+		<Unit filename="src/examples/testbench.cpp" />
+		<Unit filename="src/examples/testbench.hpp" />
 		<Unit filename="src/fixed_const_ops.hpp" />
 		<Unit filename="src/fixed_ops.hpp" />
 		<Unit filename="src/fixed_type.hpp" />
@@ -63,7 +65,9 @@
 		<Unit filename="src/initialize.hpp" />
 		<Unit filename="src/internal/fixed_const_op_types.hpp" />
 		<Unit filename="src/internal/fixed_op_types.hpp" />
-		<Unit filename="src/main.cpp" />
+		<Unit filename="src/main.cpp">
+			<Option target="Debug" />
+		</Unit>
 		<Unit filename="src/mainpage.dox" />
 		<Unit filename="src/policy.hpp" />
 		<Unit filename="src/test/Constant.cpp" />

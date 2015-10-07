@@ -1,34 +1,21 @@
-#include <cstdio>
-#include "../arpea_all.hpp"
-using namespace arpea;
+#include "testbench.hpp"
 
-static volatile fixed<R(-10), R(10), P(0.001)> input[13];
-
-
-
-
-
-static fixed<R(-20), R(20), P(0.004)> output[9];
-
-void fir()
+void fir(volatile input_t input[], output_t output[])
 {
-	initialize<ArrayValues<
-		0, R(-0.3), R(-0.5), R(-0.3),
-		0, R( 0.3), R( 0.5), R( 0.3),
-		0, R(-0.3), R(-0.5), R(-0.3), 0>>(input);
-
 	constant<R(0.7)> c1;
-	constant<R(0.9)> c2;
+	constant<R(0.5)> c2;
 	constant<R(0.3)> c3;
 	constant<R(0.1)> c4;
 
-	for(int i = 3; i < 13; i++)
-	{
-		output[i-3] = (input[i]*c4 + input[i-1]*c3 + input[i-2]*c2 + input[i-3]*c1);
-	}
+	input_t tmp[LENGTH + 3];
 
-	printf("{%f, %f, %f, %f, %f, %f, %f, %f, %f}\n",
-			(double)output[0], (double)output[1], (double)output[2],
-			(double)output[3], (double)output[4], (double)output[5],
-			(double)output[6], (double)output[7], (double)output[8]);
+	for(int i = 0; i < 3; i++)
+		tmp[i] = zero;
+	for(int i = 0; i < LENGTH; i++)
+		tmp[i+3] = input[i];
+
+	for(int i = 3; i < LENGTH + 3; i++)
+	{
+		output[i-3] = (tmp[i]*c4 + tmp[i-1]*c3 + tmp[i-2]*c2 + tmp[i-3]*c1);
+	}
 }
